@@ -1,0 +1,196 @@
+# Pipeline 3: Curation Configuration
+# Version: curation_v14_P3
+# Schema: v1
+
+pipeline:
+  name: "curation_v14_P3"
+  version: "14.0.0"
+  schema_version: "v1"
+
+# LLM Configuration
+llm:
+  model: "qwen2.5-3b-instruct"
+  device: "xpu"  # Options: cpu, cuda, xpu (Intel GPU)
+  inference_backend: "nvidia_blackwell_gb10"
+
+  # Model training information
+  training_cutoff_date: "2024-09-18"
+  training_data_sources: ["web", "academic", "technical"]
+
+  # Inference parameters
+  inference:
+    temperature: 0.3  # Low for factual tasks
+    max_tokens: 512
+    top_p: 0.9
+    batch_size: 32
+
+# LLM Confidence Calibration
+calibration:
+  enabled: true
+
+  # Four bias patterns (from v13 Phase 1 work)
+  bias_patterns:
+    numeric_skepticism:
+      enabled: true
+      adjustment_factor: 1.3  # Increase confidence for precise numbers
+      triggers: ["precise_number", "measurement", "calculation"]
+
+    proper_nouns:
+      enabled: true
+      adjustment_factor: 1.2  # Increase confidence for named entities
+      triggers: ["person_name", "organization", "location"]
+
+    textbook_formulas:
+      enabled: true
+      adjustment_factor: 0.8  # Decrease confidence for standard equations
+      triggers: ["standard_formula", "textbook_equation"]
+
+    post_training_override:
+      enabled: true
+      adjustment_factor: 1.5  # Increase confidence for knowledge gaps
+      triggers: ["unfamiliar_term", "novel_concept", "post_training"]
+
+  # Calibration parameters
+  parameters:
+    min_confidence: 0.0
+    max_confidence: 1.0
+    target_accuracy: 0.97  # 95-97% target from v13
+    confidence_interval: 0.05
+
+# Domain Specificity Validation
+domain_validation:
+  enabled: true
+
+  # Domain configuration
+  domain: "heat_transfer"
+  specialty: "thermodynamics"
+
+  # Validation thresholds
+  thresholds:
+    high_specificity: 0.90  # Core heat transfer concepts
+    medium_specificity: 0.70  # General thermodynamics
+    low_specificity: 0.50  # Tangential concepts
+    not_specific: 0.00  # Out of domain
+
+  # Domain knowledge sources
+  knowledge_sources:
+    terminology_database: true
+    equation_library: true
+    material_properties: true
+    unit_conversion: true
+
+  # Validation criteria
+  criteria:
+    terminology_check: true
+    equation_validation: true
+    dimensional_analysis: true
+    unit_consistency: true
+
+# Novelty Detection
+novelty_detection:
+  enabled: true
+
+  # Training date versioning (NEW approach from v13)
+  training_date_versioning:
+    enabled: true
+    training_cutoff: "2024-09-18"
+    version_format: "YYYY-MM-DD"  # "2024-09-18" vs "1.0"
+
+  # Novelty assessment
+  assessment:
+    pre_training_confidence: 0.95  # High for known knowledge
+    post_training_confidence: 0.60  # Lower for novel knowledge
+    research_frontier_confidence: 0.30  # Lowest for cutting-edge
+
+  # Novelty classification
+  classification:
+    pre_training: "before_2024-09-18"
+    post_training: "after_2024-09-18"
+    research_frontier: "unpublished_or_preprint"
+
+# Quality Assurance
+quality_assurance:
+  # Completeness validation
+  completeness:
+    enabled: true
+    required_fields: ["content", "metadata", "relationships"]
+    min_content_length: 10  # characters
+    metadata_completeness: 0.80  # 80% of expected metadata
+
+  # Consistency validation
+  consistency:
+    enabled: true
+    cross_reference_check: true
+    unit_consistency: true
+    terminology_consistency: true
+    relationship_consistency: true
+
+  # Accuracy validation
+  accuracy:
+    enabled: true
+    fact_checking: false  # Requires external validation
+    calculation_verification: true
+    citation_verification: true
+    cross_validation: true
+
+  # Final curation decisions
+  curation:
+    auto_approve_threshold: 0.95  # Auto-approve high-quality
+    auto_reject_threshold: 0.30  # Auto-reject low-quality
+    manual_review_threshold: 0.60  # Require manual review
+
+# Database Configuration
+database:
+  # Novelty metadata database
+  novelty_db:
+    path: "data/novelty_metadata.db"
+    format: "sqlite"
+    schema_version: "v1"
+
+  # Knowledge graph database
+  knowledge_graph_db:
+    path: "data/knowledge_graph.json"
+    format: "json"
+    schema_version: "v1"
+
+  # Curation history
+  curation_history:
+    path: "data/curation_history.log"
+    format: "jsonl"
+    retention_days: 365
+
+# Output Configuration
+output:
+  format: "json"  # Options: json, jsonl, both
+  schema_version: "v1"
+  include_metadata: true
+  include_quality_metrics: true
+  include_curation_notes: true
+  compression: false
+
+# Logging
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  format: "json"  # Options: json, text
+  file: "logs/curation_v14_P3.log"
+  console: true
+
+# Performance
+performance:
+  cache_enabled: true
+  cache_dir: "cache/curation"
+  timeout: 900  # seconds per document (15 minutes)
+  retry_attempts: 3
+  retry_delay: 5  # seconds
+
+# Economic Parameters (Local LLM Strategy)
+economics:
+  # Qwen 2.5 3B Instruct on NVIDIA Blackwell GB10
+  cost_per_10m_chunks: 4.00  # USD
+  cloud_api_equivalent: 300000.00  # USD
+  cost_ratio: 75000  # 75,000x cheaper
+
+  # Accuracy-first strategy
+  strategy: "100%_llm_probing"  # Not cost-minimization
+  target_accuracy: 0.97  # 95-97%
+  acceptable_cost_increase: 2.0  # 2x for higher accuracy OK

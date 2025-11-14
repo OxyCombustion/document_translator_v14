@@ -1,0 +1,124 @@
+# Pipeline 1: Extraction Configuration
+# Version: extraction_v14_P1
+# Schema: v1
+
+pipeline:
+  name: "extraction_v14_P1"
+  version: "14.0.0"
+  schema_version: "v1"
+
+# Detection Configuration
+detection:
+  # Enable/disable detection methods
+  methods:
+    yolo:
+      enabled: true
+      model: "doclayout_yolo_docstructbench_imgsz1280_2501.pt"
+      confidence_threshold: 0.5
+      device: "cpu"  # Options: cpu, cuda, xpu
+
+    docling:
+      enabled: true
+      mode: "cpu"  # Options: cpu, gpu
+      formula_enrichment: false  # CRITICAL: Known broken on CPU
+
+    pymupdf:
+      enabled: true
+      text_extraction: true
+      bbox_detection: true
+
+  # Detection fusion strategy
+  fusion:
+    strategy: "weighted_average"  # Options: weighted_average, max_confidence, voting
+    weights:
+      yolo: 0.5
+      docling: 0.3
+      pymupdf: 0.2
+
+# Extraction Configuration
+extraction:
+  # Equation extraction
+  equations:
+    method: "bidirectional"  # Options: bidirectional, parallel, hybrid
+    parallel:
+      enabled: true
+      num_workers: 8
+    bidirectional:
+      score_threshold: 3.0
+      direction_preference: "before"  # Options: before, after, auto
+    latex_ocr:
+      enabled: true
+      model: "pix2tex"
+      confidence_threshold: 0.5
+
+  # Table extraction
+  tables:
+    method: "hybrid"  # Options: text, vision, hybrid
+    parallel:
+      enabled: true
+      num_workers: 8
+    text_extraction:
+      markdown: true
+      preserve_structure: true
+    vision_extraction:
+      ocr: false  # Use vision models instead
+      image_embedded: true
+
+  # Figure extraction
+  figures:
+    caption_extraction: true
+    caption_search_radius: 400  # pixels
+    image_format: "png"
+    resolution: 300  # DPI
+
+  # Text extraction
+  text:
+    semantic_chunking: true
+    chunk_size_target: 384  # tokens
+    chunk_overlap: 64  # tokens
+    preserve_structure: true
+
+# Validation Configuration
+validation:
+  bbox:
+    min_area: 100  # square pixels
+    max_area: 1000000  # square pixels
+    overlap_threshold: 0.9  # IoU threshold for duplicates
+
+  content:
+    min_length: 1  # characters
+    max_length: 10000  # characters
+
+  quality:
+    min_confidence: 0.3
+    require_validation: true
+
+# Output Configuration
+output:
+  format: "json"  # Options: json, jsonl, both
+  schema_version: "v1"
+  include_metadata: true
+  include_debug_info: false
+  compression: false
+
+# Parallel Processing
+parallel:
+  enabled: true
+  num_workers: 8
+  batch_size: 10  # pages per batch
+  chunk_size: 5  # for parallel processing
+
+# Logging
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  format: "json"  # Options: json, text
+  file: "logs/extraction_v14_P1.log"
+  console: true
+
+# Performance
+performance:
+  cache_enabled: true
+  cache_dir: "cache/extraction"
+  timeout: 300  # seconds per document
+  retry_attempts: 3
+  retry_delay: 5  # seconds

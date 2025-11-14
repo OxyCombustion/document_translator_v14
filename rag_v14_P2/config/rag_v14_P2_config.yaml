@@ -1,0 +1,165 @@
+# Pipeline 2: RAG Preparation Configuration
+# Version: rag_v14_P2
+# Schema: v1
+
+pipeline:
+  name: "rag_v14_P2"
+  version: "14.0.0"
+  schema_version: "v1"
+
+# Orchestration Configuration
+orchestration:
+  # Document intelligence scanner
+  intelligence_scanner:
+    enabled: true
+    generate_strategy: true
+    analyze_structure: true
+    detect_patterns: true
+
+  # Dual-scanning framework
+  dual_scanning:
+    enabled: true
+    pymupdf_cores: 14
+    docling_cores: 11
+    comparison_cores: 4
+    cross_validate: true
+
+# Intelligence Analysis Configuration
+intelligence_analysis:
+  # Equation intelligence
+  equations:
+    enabled: true
+    detection_method: "hybrid"  # PyMuPDF + LaTeX-OCR
+    complexity_scoring: true
+    multiline_detection: true
+
+  # Figure intelligence
+  figures:
+    enabled: true
+    caption_based_detection: true
+    spatial_relationship_mapping: true
+
+  # Table intelligence
+  tables:
+    enabled: true
+    docling_detection: true
+    structure_analysis: true
+    image_embedded_detection: true
+
+  # Text intelligence
+  text:
+    enabled: true
+    semantic_segmentation: true
+    hierarchy_detection: true
+    multicolumn_layout: true
+    cross_page_continuity: true
+
+# Semantic Processing Configuration
+semantic_processing:
+  # Chunking parameters
+  chunking:
+    strategy: "semantic_boundaries"  # Options: fixed_size, semantic_boundaries, hybrid
+    target_size: 384  # tokens
+    min_size: 128  # tokens
+    max_size: 768  # tokens
+    overlap: 64  # tokens
+    preserve_context: true
+
+  # Relationship mapping
+  relationships:
+    # Spatial relationships
+    spatial:
+      proximity_threshold: 100  # pixels
+      reading_flow_analysis: true
+      layout_patterns: true
+
+    # Semantic relationships
+    semantic:
+      citation_resolution: true
+      reference_extraction: true
+      dependency_chains: true
+      conceptual_grouping: true
+
+    # Hierarchical relationships
+    hierarchical:
+      section_detection: true
+      subsection_mapping: true
+      parent_child_links: true
+
+    # Cross-object relationships
+    cross_object:
+      equation_to_table: true
+      equation_to_figure: true
+      equation_to_text: true
+      table_to_figure: true
+
+  # Metadata enrichment
+  metadata:
+    semantic_type_detection: true
+    content_classification: true
+    importance_scoring: true
+    context_preservation: true
+
+# Knowledge Graph Configuration
+knowledge_graph:
+  construction:
+    enabled: true
+    node_types: ["equation", "table", "figure", "text", "concept"]
+    edge_types: ["cites", "defines", "uses", "extends", "relates"]
+
+  metrics:
+    compute_degree: true
+    compute_centrality: true
+    compute_clustering: true
+    compute_communities: true
+
+# RAG Optimization
+rag_optimization:
+  # Embedding preparation
+  embedding:
+    format: "jsonl"
+    include_metadata: true
+    token_count: true
+    embedding_ready_check: true
+
+  # Context preservation
+  context:
+    window_size: 3  # chunks before/after
+    hierarchical_context: true
+    cross_page_context: true
+
+  # Quality scoring
+  quality:
+    embedding_readiness: true
+    content_completeness: true
+    relationship_richness: true
+
+# Output Configuration
+output:
+  format: "json"  # Options: json, jsonl, both
+  schema_version: "v1"
+  include_metadata: true
+  include_knowledge_graph: true
+  include_relationships: true
+  compression: false
+
+# Parallel Processing
+parallel:
+  enabled: true
+  num_workers: 8
+  batch_size: 100  # chunks per batch
+
+# Logging
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  format: "json"  # Options: json, text
+  file: "logs/rag_v14_P2.log"
+  console: true
+
+# Performance
+performance:
+  cache_enabled: true
+  cache_dir: "cache/rag"
+  timeout: 600  # seconds per document
+  retry_attempts: 3
+  retry_delay: 5  # seconds
