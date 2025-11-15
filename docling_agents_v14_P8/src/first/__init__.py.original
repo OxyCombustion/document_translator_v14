@@ -1,0 +1,26 @@
+"""
+DoclingFirstAgent - V9 Docling-Based Document Extraction Agent
+
+This agent represents a new approach to document processing that leverages 
+Docling's superior structure-aware text extraction as the foundation for 
+reliable table and content detection.
+
+Key Innovation:
+- Uses Docling's clean structured text instead of spatial coordinate analysis
+- Page-based chunking for memory efficiency and error isolation  
+- Structure-first approach rather than coordinate reconstruction
+- Designed to solve the 100% false positive rate of spatial analysis
+
+Author: V9 Development Team
+Version: 1.0.0
+Status: Implementation Phase
+"""
+
+from .docling_first_agent import DoclingFirstAgent
+
+__all__ = [
+    'DoclingFirstAgent'
+]
+
+__version__ = '1.0.0'
+__status__ = 'Development'
