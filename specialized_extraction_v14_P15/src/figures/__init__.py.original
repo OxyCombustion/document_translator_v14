@@ -1,0 +1,33 @@
+"""
+Figure Extractor Agent - V9 Specialized Figure Detection and Image Export
+"""
+import sys
+import os
+import io
+import warnings
+from pathlib import Path
+from typing import Dict, Any, Optional
+
+# Suppress warnings that can cause hanging issues
+warnings.filterwarnings('ignore')
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == 'win32':
+    # Safer UTF-8 setup - only wrap if not already wrapped
+    if not hasattr(sys.stdout, '_wrapped_utf8'):
+        try:
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+            sys.stdout._wrapped_utf8 = True
+        except (AttributeError, OSError, io.UnsupportedOperation):
+            pass
+    
+    if not hasattr(sys.stderr, '_wrapped_utf8'):
+        try:
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+            sys.stderr._wrapped_utf8 = True
+        except (AttributeError, OSError, io.UnsupportedOperation):
+            pass
+
+from .v8_figure_extractor import V8FigureExtractorAgent
+
+__all__ = ['V8FigureExtractorAgent']
