@@ -310,11 +310,13 @@ python tools/test_v14_integration.py
 - [x] Import cleanup complete
 - [x] Integration testing complete
 - [x] Requirements files created
+- [x] Import errors fixed (3 packages)
 - [x] Documentation comprehensive
 
 ### Next Steps
-- [ ] Fix 3 packages with import errors
+- [ ] Install dependencies (pip install -r requirements.txt)
 - [ ] Re-run integration tests (expect 100% pass)
+- [ ] Migrate 6 files from v13 to v14 import style (see IMPORT_FIX_SUMMARY.md)
 - [ ] Create pyproject.toml for pip distribution
 - [ ] Add unit tests for core packages
 - [ ] Performance optimization
