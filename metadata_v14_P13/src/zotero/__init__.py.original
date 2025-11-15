@@ -1,0 +1,13 @@
+"""
+Metadata Extraction Agents
+
+Provides bibliographic metadata extraction from multiple sources:
+- Zotero local database integration
+- PDF header/footer parsing
+- Web search supplementation
+"""
+
+from .zotero_integration_agent import ZoteroIntegrationAgent
+from .document_metadata_agent import DocumentMetadataAgent
+
+__all__ = ['ZoteroIntegrationAgent', 'DocumentMetadataAgent']
