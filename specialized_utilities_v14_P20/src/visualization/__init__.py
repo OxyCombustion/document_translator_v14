@@ -1,5 +1,6 @@
 """Visualization utilities."""
 
 from .grid_overlay_agent import *
+from .gui_viewer_agent import GUIViewerAgent
 
-__all__ = []  # Will be populated during import cleanup
+__all__ = ['GUIViewerAgent']
