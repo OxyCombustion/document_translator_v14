@@ -13,7 +13,7 @@ PyMuPDF>=1.23.0,<2.0.0
 docling>=1.0.0,<2.0.0
 
 # DocLayout-YOLO - Document layout detection
-doclayout-yolo>=0.1.0
+doclayout-yolo>=0.0.4,<1.0.0
 
 # ============================================================================
 # COMPUTER VISION & OCR

@@ -47,8 +47,8 @@ from typing import List, Optional, Tuple
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 
-# Import Zone from base agent (proper relative import)
-from ..base_extraction_agent import Zone
+# Import Zone from common package (v14 import style)
+from common.src.base.base_extraction_agent import Zone
 
 
 @dataclass
