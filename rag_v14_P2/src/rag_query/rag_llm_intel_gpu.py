@@ -30,8 +30,6 @@ if sys.platform == 'win32':
             pass
 
 import sys
-sys.path.insert(0, 'E:/document_translator_v13/src')
-
 from pathlib import Path
 from rag.chromadb_setup import RAGDatabase
 import torch

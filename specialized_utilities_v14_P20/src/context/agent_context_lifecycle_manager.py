@@ -33,8 +33,6 @@ if sys.platform == 'win32':
             os.system('chcp 65001')
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 from core.context_manager import ContextManager
 
 class AgentContextLifecycleManager:

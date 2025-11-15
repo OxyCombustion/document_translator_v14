@@ -45,23 +45,23 @@ import json
 import shutil
 
 # Import detection modules (absolute imports from package root)
-from agents.detection.unified_detection_module import UnifiedDetectionModule
-from agents.detection.docling_table_detector import DoclingTableDetector
-from agents.detection.docling_figure_detector import DoclingFigureDetector
-from agents.detection.docling_text_detector import DoclingTextDetector
+from detection_v14_P14.src.unified.unified_detection_module import UnifiedDetectionModule
+from detection_v14_P14.src.docling.docling_table_detector import DoclingTableDetector
+from detection_v14_P14.src.docling.docling_figure_detector import DoclingFigureDetector
+from detection_v14_P14.src.docling.docling_text_detector import DoclingTextDetector
 
 # Import existing RAG agents (absolute imports from package root)
-from agents.rag_extraction.equation_extraction_agent import EquationExtractionAgent
-from agents.rag_extraction.table_extraction_agent import TableExtractionAgent
-from agents.rag_extraction.figure_extraction_agent import FigureExtractionAgent
-from agents.rag_extraction.text_extraction_agent import TextExtractionAgent
+from rag_extraction_v14_P16.src.equations.equation_extraction_agent import EquationExtractionAgent
+from rag_extraction_v14_P16.src.tables.table_extraction_agent import TableExtractionAgent
+from rag_extraction_v14_P16.src.figures.figure_extraction_agent import FigureExtractionAgent
+from rag_extraction_v14_P16.src.text.text_extraction_agent import TextExtractionAgent
 
 # Import new validation and coordination agents
-from agents.validation.document_reference_inventory_agent import DocumentReferenceInventoryAgent
-from agents.coordination.object_numbering_coordinator import ObjectNumberingCoordinator
-from agents.validation.completeness_validation_agent import CompletenessValidationAgent
-from agents.metadata.bibliography_extraction_agent import BibliographyExtractionAgent
-from agents.table_export_agent import TableExportAgent
+from analysis_validation_v14_P19.src.validation.document_reference_inventory_agent import DocumentReferenceInventoryAgent
+from specialized_extraction_v14_P15.src.coordination.object_numbering_coordinator import ObjectNumberingCoordinator
+from analysis_validation_v14_P19.src.validation.completeness_validation_agent import CompletenessValidationAgent
+from metadata_v14_P13.src.bibliography.bibliography_extraction_agent import BibliographyExtractionAgent
+from curation_v14_P3.src.export.table_export_agent import TableExportAgent
 
 
 class UnifiedPipelineOrchestrator:

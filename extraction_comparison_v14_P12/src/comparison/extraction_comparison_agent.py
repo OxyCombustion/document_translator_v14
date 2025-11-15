@@ -48,12 +48,10 @@ try:
     from ...core.unified_document_importer import create_unified_importer, UnifiedDocument
     from ..base import BaseAgent, AgentResult, BoundingBox
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from core.logger import get_logger
     from core.spatial_metadata import SpatialLocation
     from core.unified_document_importer import create_unified_importer, UnifiedDocument
-    from agents.base import BaseAgent, AgentResult, BoundingBox
+    from common.src.base.base_agent import BaseAgent, AgentResult, BoundingBox
 
 # Import extraction methods
 from .method_2_docling_extractor import DoclingTableExtractor

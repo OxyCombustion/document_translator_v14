@@ -56,9 +56,7 @@ try:
     from ...core.logger import get_logger
     from ...core.unified_document_importer import UnifiedDocument, PageData, create_unified_importer
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-    from agents.base import BaseAgent, AgentResult, BoundingBox
+    from common.src.base.base_agent import BaseAgent, AgentResult, BoundingBox
     from core.logger import get_logger
     from core.unified_document_importer import UnifiedDocument, PageData, create_unified_importer
 

@@ -52,7 +52,6 @@ if sys.platform == 'win32':
             pass
 
 # Import existing caption extractors
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from caption_extraction.table_caption_extractor import TableCaptionExtractor
 from base_extraction_agent import Zone
 

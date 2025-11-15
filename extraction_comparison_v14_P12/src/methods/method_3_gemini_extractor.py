@@ -67,13 +67,11 @@ try:
     from ..base import BoundingBox
     UNIFIED_IMPORT_AVAILABLE = True
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     try:
         from core.unified_document_importer import UnifiedDocument, PageData
         from core.logger import get_logger
         from core.spatial_metadata import SpatialLocation
-        from agents.base import BoundingBox
+        from common.src.base.base_agent import BoundingBox
         UNIFIED_IMPORT_AVAILABLE = True
     except ImportError:
         UnifiedDocument = None

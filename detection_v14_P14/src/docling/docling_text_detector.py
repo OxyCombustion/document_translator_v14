@@ -42,8 +42,6 @@ from pathlib import Path
 from typing import List, Optional
 from dataclasses import dataclass
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from base_extraction_agent import Zone
 
 from docling.document_converter import DocumentConverter

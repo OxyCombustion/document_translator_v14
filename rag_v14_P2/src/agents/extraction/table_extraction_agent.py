@@ -68,7 +68,6 @@ import fitz  # PyMuPDF
 import pandas as pd
 
 # Import base agent
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
 
 

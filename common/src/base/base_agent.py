@@ -22,8 +22,6 @@ try:
     # TODO: task_context_manager is P1 - will be migrated in Phase 2
     # from ..context.task_context_manager import TaskContextManager, TaskContext
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent))
     from logging.logger import setup_logger
     from context.context_loader import load_agent_context, ProjectContext
     # TODO: task_context_manager is P1 - will be migrated in Phase 2

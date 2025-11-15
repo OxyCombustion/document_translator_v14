@@ -427,8 +427,6 @@ if __name__ == "__main__":
     from pathlib import Path
     import json
 
-    # Add parent directory to path for imports
-    sys.path.insert(0, str(Path(__file__).parent.parent))
     from base_extraction_agent import Zone
 
     # Load inventory (from DocumentReferenceInventoryAgent)

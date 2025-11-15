@@ -85,7 +85,7 @@ import fitz  # PyMuPDF
 from PIL import Image
 
 # Import base agent using proper package structure
-from agents.base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
+from common.src.base.base_agent import BaseExtractionAgent, Zone, ExtractedObject
 
 
 class EquationExtractionAgent(BaseExtractionAgent):

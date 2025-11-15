@@ -52,9 +52,7 @@ try:
     from ...core.logger import setup_logger
     from ...core.context_loader import load_agent_context
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-    from agents.base import BaseAgent, AgentResult, AgentStatus
+    from common.src.base.base_agent import BaseAgent, AgentResult, AgentStatus
     from core.logger import setup_logger
     from core.context_loader import load_agent_context
 

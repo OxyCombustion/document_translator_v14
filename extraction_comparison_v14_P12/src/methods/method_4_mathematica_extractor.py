@@ -74,11 +74,9 @@ try:
     from ...core.spatial_metadata import SpatialLocation
     from ..base import BoundingBox
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from core.logger import get_logger
     from core.spatial_metadata import SpatialLocation
-    from agents.base import BoundingBox
+    from common.src.base.base_agent import BoundingBox
 
 logger = get_logger("MathematicaExtractor")
 

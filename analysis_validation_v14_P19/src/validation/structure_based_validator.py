@@ -12,8 +12,7 @@ import logging
 # Import our analyzers
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from agents.mathematica_agent.document_structure_analyzer import MathematicaDocumentAnalyzer
+from specialized_utilities_v14_P20.src.mathematica.document_structure_analyzer import MathematicaDocumentAnalyzer
 
 logger = logging.getLogger(__name__)
 

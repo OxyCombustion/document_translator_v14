@@ -11,8 +11,7 @@ import logging
 
 # Import validation framework
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from agents.validation_agent.structure_based_validator import StructureBasedValidator
+from analysis_validation_v14_P19.src.validation.structure_based_validator import StructureBasedValidator
 
 logger = logging.getLogger(__name__)
 

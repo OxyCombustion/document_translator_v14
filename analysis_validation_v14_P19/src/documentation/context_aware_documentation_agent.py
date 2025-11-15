@@ -20,9 +20,7 @@ try:
     from ...core.logger import get_logger
     from .test_tracking import TestResultTracker
 except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-    from agents.base import BaseAgent, AgentResult
+    from common.src.base.base_agent import BaseAgent, AgentResult
     from core.logger import get_logger
     from agents.documentation_agent.test_tracking import TestResultTracker
 

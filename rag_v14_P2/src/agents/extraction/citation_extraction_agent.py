@@ -46,7 +46,6 @@ if sys.platform == 'win32':
             pass
 
 # Import base structures
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from base_extraction_agent import ExtractedObject
 
 

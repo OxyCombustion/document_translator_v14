@@ -50,7 +50,6 @@ from .impact_assessment_agent import ImpactAssessmentAgent, ImpactComponents
 from .citation_graph_analyzer import CitationGraphAnalyzer
 
 # Import API clients
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "utils"))
 from openalex_client import OpenAlexClient
 from crossref_client import CrossrefClient
 from unpaywall_client import UnpaywallClient

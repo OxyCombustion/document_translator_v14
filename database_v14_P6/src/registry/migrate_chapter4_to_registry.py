@@ -40,8 +40,6 @@ import json
 from datetime import datetime
 
 # Import our new modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from database.document_registry import DocumentRegistry, DocumentMetadata, ExtractionMetadata, create_book_metadata
 from database.metadata_extractor import MetadataExtractor
 from database.directory_organizer import DirectoryOrganizer

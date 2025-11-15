@@ -39,8 +39,6 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from database.document_registry import DocumentRegistry
 
 # Optional ChromaDB import
