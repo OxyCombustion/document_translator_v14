@@ -69,10 +69,8 @@ class EquationNumberOCRAgent:
                     if found:
                         pytesseract.pytesseract.tesseract_cmd = found
                 # 4) Windows standard install locations as last resort
-            try:
-                if platform.system().lower().startswith('win'):
-                    cmd = getattr(pytesseract.pytesseract, 'tesseract_cmd', 'tesseract')
-                    if cmd == 'tesseract':
+                if getattr(pytesseract.pytesseract, 'tesseract_cmd', 'tesseract') == 'tesseract':
+                    if platform.system().lower().startswith('win'):
                         candidates = [
                             r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
                             r"C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe",
