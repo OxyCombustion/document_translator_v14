@@ -1,6 +1,6 @@
 # Bibliography - Chapter 4 Heat Transfer
 
-**Extracted**: 2025-11-16T11:33:48.705185  
+**Extracted**: 2025-11-16T13:14:26.698142  
 **Total References**: 18
 
 ---
