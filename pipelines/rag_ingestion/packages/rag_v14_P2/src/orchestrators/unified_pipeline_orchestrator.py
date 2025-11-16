@@ -205,7 +205,7 @@ class UnifiedPipelineOrchestrator:
 
         # First: Run Docling once (for tables, figures, AND text)
         print("Running Docling conversion (tables + figures + text)...")
-        docling_result = docling_table_detector.converter.convert_single(pdf_path)
+        docling_result = docling_table_detector.converter.convert(pdf_path)
 
         # Extract tables, figures, and text from same Docling result (sequential, can't pickle)
         print("Extracting Docling zones (tables + figures + text)...")

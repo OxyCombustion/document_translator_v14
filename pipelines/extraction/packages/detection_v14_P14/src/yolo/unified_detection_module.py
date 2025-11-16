@@ -217,7 +217,7 @@ class UnifiedDetectionModule:
                     tmp_path = tmp.name
 
                 # Run YOLO detection
-                results = self.model.predict(tmp_path, conf=self.conf_threshold, verbose=False)
+                results = self.model.predict(tmp_path, conf=self.confidence_threshold, verbose=False)
 
                 # Clean up temp file
                 os.unlink(tmp_path)

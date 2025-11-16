@@ -56,7 +56,7 @@ print(f"✅ Model found: {MODEL_PATH}")
 # Import the orchestrator
 print("\nImporting UnifiedPipelineOrchestrator...")
 try:
-    from rag_v14_P2.src.orchestrators.unified_pipeline_orchestrator import UnifiedPipelineOrchestrator
+    from pipelines.rag_ingestion.packages.rag_v14_P2.src.orchestrators.unified_pipeline_orchestrator import UnifiedPipelineOrchestrator
     print("✅ UnifiedPipelineOrchestrator imported")
 except Exception as e:
     print(f"❌ Import failed: {e}")

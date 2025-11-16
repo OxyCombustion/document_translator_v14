@@ -126,7 +126,7 @@ class CompletenessValidationAgent:
 
             # Get expected objects from inventory
             if obj_type in inventory:
-                expected = set(inventory[obj_type]['all_referenced'])
+                expected = set(inventory[obj_type].all_referenced)
             else:
                 expected = set()
 

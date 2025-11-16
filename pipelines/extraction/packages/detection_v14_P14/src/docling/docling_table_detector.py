@@ -83,7 +83,7 @@ class DoclingTableDetector:
             result = docling_result
         else:
             print("Running Docling conversion...")
-            result = self.converter.convert_single(pdf_path)
+            result = self.converter.convert(pdf_path)
 
         # Extract table zones
         zones = []
