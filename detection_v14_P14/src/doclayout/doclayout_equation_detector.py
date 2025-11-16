@@ -225,12 +225,18 @@ class DocLayoutEquationDetector:
             if not output_dir:
                 page_img_path.unlink()
 
-        doc.close()
-
         duration = (datetime.now() - start_time).total_seconds()
         print()
         print(f"Detection complete in {duration:.1f}s ({duration/60:.1f} minutes)")
-        print(f"Equations detected: {len(zones)}")
+        print(f"Raw detections: {len(zones)}")
+
+        # Merge equation + number pairs
+        print(f"\n🔧 Merging equation + number pairs...")
+        zones = self._merge_equation_and_numbers(zones, doc)
+        print(f"   After merging: {len(zones)} unique equations")
+
+        # Close document after merge completes
+        doc.close()
         print(f"Average confidence: {sum(z.metadata['confidence'] for z in zones)/len(zones):.3f}" if zones else "N/A")
         print()
 
@@ -240,6 +246,142 @@ class DocLayoutEquationDetector:
             print(f"   V13 benchmark: 108 equations in ~100s")
             print(f"   V14 result: {len(zones)} equations in {duration:.1f}s")
             if len(zones) == 108:
-                print(f"   🎉 EXACT MATCH with v13 coverage!")
+                print(f"   🎉 PERFECT MATCH with v13 coverage!")
+            elif len(zones) >= 100 and len(zones) <= 115:
+                print(f"   ✅ CLOSE TO v13 benchmark (within expected range)")
 
         return zones
+
+    def _merge_equation_and_numbers(self, zones: List[Zone], doc: fitz.Document) -> List[Zone]:
+        """
+        Merge equation content with equation numbers that were detected separately.
+
+        YOLO detects both the equation content AND the equation number (e.g., "(1)")
+        as separate objects. This method merges them into single equations.
+
+        Strategy:
+        1. Group zones by page
+        2. For each page, find pairs of zones that are spatially close
+        3. Extract text to identify which is just the number vs the equation
+        4. Merge pairs: keep larger bbox (equation), add number to metadata
+        5. Remove standalone numbers
+
+        Args:
+            zones: List of detected zones (before merging)
+            doc: PyMuPDF document object for text extraction
+
+        Returns:
+            List[Zone] with merged equations
+        """
+        import re
+        from collections import defaultdict
+
+        # Group zones by page
+        by_page = defaultdict(list)
+        for zone in zones:
+            by_page[zone.page].append(zone)
+
+        merged_zones = []
+        merge_count = 0
+
+        # Process each page
+        for page_num, page_zones in sorted(by_page.items()):
+            page = doc[page_num - 1]  # Convert to 0-indexed
+            used = set()  # Track which zones have been merged
+
+            # Find nearby pairs
+            for i, zone1 in enumerate(page_zones):
+                if i in used:
+                    continue
+
+                # Check if this zone is just an equation number
+                rect1 = fitz.Rect(zone1.bbox)
+                text1 = page.get_text("text", clip=rect1).strip()
+
+                # Pattern for standalone equation numbers: "(1)", "(2a)", etc.
+                number_pattern = r'^\((\d+[a-z]?)\)$'
+                is_number1 = bool(re.match(number_pattern, text1))
+
+                # Calculate area
+                area1 = (rect1.x1 - rect1.x0) * (rect1.y1 - rect1.y0)
+
+                # Look for a nearby equation content zone
+                best_match = None
+                best_distance = float('inf')
+
+                for j, zone2 in enumerate(page_zones):
+                    if i == j or j in used:
+                        continue
+
+                    rect2 = fitz.Rect(zone2.bbox)
+                    text2 = page.get_text("text", clip=rect2).strip()
+                    is_number2 = bool(re.match(number_pattern, text2))
+                    area2 = (rect2.x1 - rect2.x0) * (rect2.y1 - rect2.y0)
+
+                    # Only merge if one is a number and one is not
+                    if not (is_number1 != is_number2):
+                        continue
+
+                    # Calculate distance between zones
+                    center1_x = (rect1.x0 + rect1.x1) / 2
+                    center1_y = (rect1.y0 + rect1.y1) / 2
+                    center2_x = (rect2.x0 + rect2.x1) / 2
+                    center2_y = (rect2.y0 + rect2.y1) / 2
+
+                    distance = ((center1_x - center2_x)**2 + (center1_y - center2_y)**2)**0.5
+
+                    # Consider zones nearby if distance < 100 points (typical equation number spacing)
+                    if distance < 100 and distance < best_distance:
+                        best_distance = distance
+                        best_match = (j, zone2, text2, area2, is_number2)
+
+                # If we found a match, merge them
+                if best_match:
+                    j, zone2, text2, area2, is_number2 = best_match
+
+                    # Determine which is the equation content (larger) vs number (smaller)
+                    if is_number1:
+                        # zone1 is the number, zone2 is the equation
+                        equation_zone = zone2
+                        number_text = text1
+                    else:
+                        # zone1 is the equation, zone2 is the number
+                        equation_zone = zone1
+                        number_text = text2
+
+                    # Extract the number
+                    number_match = re.match(number_pattern, number_text)
+                    if number_match:
+                        equation_number = number_match.group(1)
+
+                        # Add equation number to metadata
+                        equation_zone.metadata['equation_number'] = equation_number
+                        equation_zone.metadata['has_number'] = True
+
+                        print(f"   Merged: Equation ({equation_number}) - distance: {best_distance:.1f}pt")
+
+                        merged_zones.append(equation_zone)
+                        used.add(i)
+                        used.add(j)
+                        merge_count += 1
+                else:
+                    # No match found - keep this zone as-is
+                    # But mark if it's a standalone number (might be false positive)
+                    if is_number1:
+                        zone1.metadata['standalone_number'] = True
+                        zone1.metadata['possible_false_positive'] = True
+                    zone1.metadata['has_number'] = False
+                    merged_zones.append(zone1)
+                    used.add(i)
+
+        print(f"   Merged {merge_count} equation+number pairs")
+        print(f"   Removed {len(zones) - len(merged_zones)} duplicate detections")
+
+        # Renumber merged zones
+        for idx, zone in enumerate(merged_zones, 1):
+            old_id = zone.zone_id
+            zone.zone_id = f"eq_merged_{zone.page}_{idx}"
+            zone.metadata['merged_index'] = idx
+            zone.metadata['original_zone_id'] = old_id
+
+        return merged_zones
