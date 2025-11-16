@@ -278,6 +278,12 @@ class UnifiedDetectionModule:
         print(f"  Text blocks: {len(text_blocks)}")
         print()
 
+        # Extract text for equation numbers (needed for pairing)
+        print("Extracting text for equation numbers...")
+        self._extract_text_for_numbers(pdf_path, equation_numbers)
+        print(f"  Extracted text for {len([n for n in equation_numbers if n.text])} equation numbers")
+        print()
+
         # Pair equations with numbers
         print("Pairing equations with numbers...")
         equation_zones = self._pair_equations(equations, equation_numbers)
@@ -484,6 +490,44 @@ class UnifiedDetectionModule:
             )
             zones.append(zone)
         return zones
+
+    def _extract_text_for_numbers(self, pdf_path: Path, number_detections: List[Detection]) -> None:
+        """
+        Extract text from PDF at equation number bounding boxes.
+
+        This populates the `.text` attribute of each Detection object with the
+        actual text found in the PDF (e.g., "(1)", "(42)", etc.). This is needed
+        for the pairing logic to extract equation numbers via regex.
+
+        Args:
+            pdf_path: Path to PDF file
+            number_detections: List of equation_number Detection objects (modified in-place)
+        """
+        if not number_detections:
+            return
+
+        # Open PDF to extract text
+        doc = fitz.open(pdf_path)
+
+        try:
+            for detection in number_detections:
+                try:
+                    # Get page
+                    page = doc[detection.page_num]
+
+                    # Get text from bbox
+                    rect = fitz.Rect(detection.bbox)
+                    text = page.get_text("text", clip=rect).strip()
+
+                    # Populate text attribute (modifies Detection in-place)
+                    detection.text = text
+
+                except Exception as e:
+                    # If text extraction fails, leave as empty string
+                    detection.text = ""
+
+        finally:
+            doc.close()
 
 
 def _detect_page_worker(pdf_path: str, page_num: int, model_path: str,
