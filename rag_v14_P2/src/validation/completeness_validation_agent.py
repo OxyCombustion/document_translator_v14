@@ -427,7 +427,7 @@ if __name__ == "__main__":
     from pathlib import Path
     import json
 
-    from base_extraction_agent import Zone
+    from common.src.base.base_extraction_agent import Zone
 
     # Load inventory (from DocumentReferenceInventoryAgent)
     inventory_path = Path("results/inventory/reference_inventory.json")

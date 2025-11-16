@@ -28,8 +28,8 @@ if sys.platform == 'win32':
             pass
 
 import fitz  # PyMuPDF
-from figure_data_structures import (
-    FigureCandidate, BoundingBox, DetectionMethod, 
+from extraction_v14_P1.src.agents.figure.figure_data_structures import (
+    FigureCandidate, BoundingBox, DetectionMethod,
     FigureDetectionError, QualityMetrics
 )
 

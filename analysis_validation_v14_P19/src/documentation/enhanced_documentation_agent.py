@@ -11,7 +11,8 @@ from datetime import datetime
 
 from .context_aware_documentation_agent import ContextAwareDocumentationAgent, DocumentationTask
 from .real_time_monitor import RealTimeMonitor, DevelopmentEvent, create_real_time_monitor
-from ...core.logger import get_logger
+# V14 imports (updated from v13 imports)
+from common.src.logging.logger import get_logger
 
 logger = get_logger("EnhancedDocumentationAgent")
 

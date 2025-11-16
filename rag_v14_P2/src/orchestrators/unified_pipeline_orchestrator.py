@@ -45,7 +45,8 @@ import json
 import shutil
 
 # Import detection modules (absolute imports from package root)
-from detection_v14_P14.src.unified.unified_detection_module import UnifiedDetectionModule
+# YOLO module with PyTorch 2.9+ compatibility fix
+from detection_v14_P14.src.yolo.unified_detection_module import UnifiedDetectionModule
 from detection_v14_P14.src.docling.docling_table_detector import DoclingTableDetector
 from detection_v14_P14.src.docling.docling_figure_detector import DoclingFigureDetector
 from detection_v14_P14.src.docling.docling_text_detector import DoclingTextDetector

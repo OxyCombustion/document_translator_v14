@@ -32,8 +32,8 @@ if sys.platform == 'win32':
             import os
             os.system('chcp 65001')
 
-# Add src to path for imports
-from core.context_manager import ContextManager
+# V14 imports (updated from v13 imports)
+from common.src.context.context_manager import ContextManager
 
 class AgentContextLifecycleManager:
     """

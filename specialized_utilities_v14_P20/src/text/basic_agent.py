@@ -7,11 +7,13 @@ import time
 from typing import Dict, Any
 import numpy as np
 
-from ..base import BaseAgent, AgentResult
-from ...core.agent_communication import AgentCommunicationMixin
+# V14 imports (updated from v13 imports)
+from common.src.base.base_agent import BaseAgent, AgentResult
+
+# AgentCommunicationMixin not available in v14 - removed from inheritance
 
 
-class BasicTextExtractorAgent(BaseAgent, AgentCommunicationMixin):
+class BasicTextExtractorAgent(BaseAgent):
     """Basic text extraction agent for testing"""
     
     def __init__(self, config: Dict[str, Any], name: str = "text_extractor"):

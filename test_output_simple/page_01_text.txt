@@ -1,0 +1,133 @@
+4-1
+Steam 42 / Heat Transfer
+The Babcock & Wilcox Company
+Heat transfer involves the transmission of thermal 
+energy and plays a central role in most energy conver­
+sion processes. Heat transfer is important in fossil fuel 
+combustion, chemical reaction processes, electrical 
+systems, nuclear fission and certain fluid systems. It 
+also occurs during everyday activities including cooking, 
+heating and refrigeration, as well as being an important 
+consideration in choosing clothing for different climates.
+Although the fundamentals of heat transfer are simple, 
+practical applications are complex because real systems 
+contain irregular geometries, combined modes of heat 
+transfer and time dependent responses.
+Fundamentals
+Basic modes of heat transfer
+There are three modes of heat transfer: conduction, 
+convection and radiation. One or more of these modes 
+controls the amount of heat transfer in all applications. 
+Conduction  Temperature is a property that indicates
+the kinetic energy possessed by the molecules of a 
+substance; the higher the temperature the greater the 
+kinetic energy or molecular activity of the substance. 
+Molecular conduction of heat is simply the transfer of 
+energy due to a temperature difference between adjacent 
+molecules in a solid, liquid or gas.
+Conduction heat transfer is evaluated using Fourier’s 
+law:
+	
+	
+(1)
+The flow of heat, qc, is positive when the temperature 
+gradient, dT/dx, is negative. This result, consistent with 
+the second law of thermodynamics, indicates that heat 
+flows in the direction of decreasing temperature. The 
+heat flow, qc, is in a direction normal (or perpendicular) 
+to an area, A, and the gradient, dT/dx, is the rate of 
+temperature change in the direction of heat flow. The 
+thermal conductivity, k, a property of the material, 
+quantifies its ability to conduct heat. A range of thermal 
+conductivities is listed in Table 1. The integrated form 
+of the conduction law is written:
+	
+	
+(2)
+Fig. 1 illustrates positive heat flow described by 
+this equation and shows the effect of variable thermal 
+q
+kA dT
+dx
+c = −
+q
+kA
+L
+T
+T
+=
+−
+(
+)
+1
+2
+Chapter 4
+Heat Transfer
+conductivity on the temperature distribution. The 
+grouping kA/L is known as the thermal conductance, Kc; 
+the inverse L/kA is known as the thermal resistance, Rc 
+and Kc = 1/Rc.
+A special case of conduction is the thermal contact 
+resistance across a joint between solid materials. At the 
+interface of two solid materials the surface-to-surface 
+contact is imperfect from the gap that prevails due to 
+surface roughness. In nuclear applications with fuel 
+pellets and fuel cladding, surface contact resistance can 
+have a major impact on heat transfer. If one dimensional 
+steady heat flow is assumed, the heat transfer across a 
+gap is defined by:
+	
+	
+(3)
+where the quantity Rct is called the thermal contact 
+resistance, 1/hctA, and hct is called the contact coefficient. 
+T1 and T2 are the average surface temperatures on each 
+side of the gap. Tabulated values of the contact coefficient 
+are presented in References 1 and 2. Examples include 
+300 Btu/h ft2 F (1.7 kW/m2 K) between two sections of 
+ground 304 stainless steel in air and 25,000 Btu/h ft2 
+F (142 kW/m2 K) between two sections of ground copper 
+in air. The factors are usually unknown for specific 
+applications and estimates need to be made. There are 
+two principal contributions across the gap — solid-to-solid 
+conduction at the points of contact and thermal conduction 
+through the entrapped gases in the void spaces.
+Convection  Convection heat transfer within a fluid 
+(gas or liquid) occurs by a combination of molecular 
+q
+T
+T
+Rct
+=
+−
+1
+2
+Table 1
+Thermal Conductivity, k, of Common Materials
+ 
+Material 
+Btu/h ft F 
+W/m C
+Gases at atmospheric
+ pressure 
+0.004 to 0.70 
+0.007 to 1.2
+Insulating materials 
+0.01 to 0.12 
+0.02 to 0.21
+Nonmetallic liquids 
+0.05 to 0.40 
+0.09 to 0.70
+Nonmetallic solids
+ (brick, stone, concrete) 
+0.02 to 1.5 
+0.04 to 2.6
+Liquid metals 
+5.0 to 45 
+8.6 to 78
+Alloys 
+8.0 to 70 
+14 to 121
+Pure metals 
+30 to 240 
+52 to 415

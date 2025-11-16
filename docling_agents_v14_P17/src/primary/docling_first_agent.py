@@ -50,15 +50,14 @@ except ImportError:
         BEAUTIFULSOUP_AVAILABLE = False
         BeautifulSoup = None
 
-# V9 base imports
-try:
-    from ..base import BaseAgent, AgentResult, BoundingBox
-    from ...core.logger import get_logger
-    from ...core.unified_document_importer import UnifiedDocument, PageData, create_unified_importer
-except ImportError:
-    from common.src.base.base_agent import BaseAgent, AgentResult, BoundingBox
-    from core.logger import get_logger
-    from core.unified_document_importer import UnifiedDocument, PageData, create_unified_importer
+# V14 base imports (updated from v13 imports)
+from common.src.base.base_agent import BaseAgent, AgentResult, BoundingBox
+from common.src.logging.logger import get_logger
+
+# UnifiedDocument not available in v14 - set to None for isinstance checks
+UnifiedDocument = None
+PageData = None
+create_unified_importer = None
 
 # Docling imports
 try:

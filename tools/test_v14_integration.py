@@ -75,8 +75,8 @@ PACKAGES = [
 # Critical cross-package imports to test
 CROSS_PACKAGE_IMPORTS = [
     ("Base Agent (common)", "from common.src.base.base_agent import BaseAgent"),
-    ("Base Extraction Agent", "from common.src.base.base_agent import BaseExtractionAgent"),
-    ("Zone & ExtractedObject", "from common.src.base.base_agent import Zone, ExtractedObject"),
+    ("Base Extraction Agent", "from common.src.base.base_extraction_agent import BaseExtractionAgent"),
+    ("Zone & ExtractedObject", "from common.src.base.base_extraction_agent import Zone, ExtractedObject"),
     ("Unified Detection", "from detection_v14_P14.src.unified.unified_detection_module import UnifiedDetectionModule"),
     ("Equation Extraction", "from rag_extraction_v14_P16.src.equations.equation_extraction_agent import EquationExtractionAgent"),
     ("Figure Extraction", "from rag_extraction_v14_P16.src.figures.figure_extraction_agent import FigureExtractionAgent"),

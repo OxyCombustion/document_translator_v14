@@ -53,7 +53,7 @@ if sys.platform == 'win32':
 
 # Import existing caption extractors
 from caption_extraction.table_caption_extractor import TableCaptionExtractor
-from base_extraction_agent import Zone
+from common.src.base.base_extraction_agent import Zone
 
 
 class ObjectNumberingCoordinator:

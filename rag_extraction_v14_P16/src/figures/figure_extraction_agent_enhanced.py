@@ -43,7 +43,7 @@ if sys.platform == 'win32':
 import fitz  # PyMuPDF
 
 # Import base agent
-from base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
+from common.src.base.base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
 
 
 class EnhancedFigureExtractionAgent(BaseExtractionAgent):

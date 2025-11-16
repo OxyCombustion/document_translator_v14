@@ -67,8 +67,8 @@ if sys.platform == 'win32':
 import fitz  # PyMuPDF
 import pandas as pd
 
-# Import base agent
-from base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
+# Import base agent (v14 package import)
+from common.src.base.base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
 
 
 class TableExtractionAgent(BaseExtractionAgent):

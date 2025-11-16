@@ -23,7 +23,8 @@ except ImportError:
     Observer = None
     FileSystemEventHandler = None
 
-from ...core.logger import get_logger
+# V14 imports (updated from v13 imports)
+from common.src.logging.logger import get_logger
 
 logger = get_logger("RealTimeMonitor")
 

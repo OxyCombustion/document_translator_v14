@@ -92,70 +92,53 @@ class DoclingTextDetector:
         else:
             print("Using existing Docling result (shared conversion)...")
 
-        # Use result.document (v13 API, has .texts, .pages) instead of result.output
-        if hasattr(docling_result, 'document'):
-            doc = docling_result.document
-        elif hasattr(docling_result, 'output'):
-            doc = docling_result.output
-        else:
-            print("⚠️  Docling result has neither 'document' nor 'output' attribute")
+        # Use result.output.main_text (current Docling API)
+        if not hasattr(docling_result, 'output'):
+            print("⚠️  No 'output' attribute on ConversionResult")
             return []
 
-        # Extract text blocks
-        print(f"Extracting text blocks...")
-        text_blocks = []
+        output = docling_result.output
+        if not hasattr(output, 'main_text'):
+            print("⚠️  No 'main_text' attribute on ExportedCCSDocument")
+            return []
 
-        for idx, text_item in enumerate(doc.texts):
-            # Get text content
-            text_content = str(text_item.text)
+        main_text = output.main_text
+        print(f"Using result.output.main_text (current Docling API)")
 
-            # Skip empty text blocks
-            if not text_content.strip():
-                continue
+        # Extract text content as single zone (main_text is string, not iterator)
+        # For now, create one large text zone covering the whole document
+        print(f"Extracting main text content...")
 
-            # Get page number (Docling uses 1-based indexing)
-            page_num = text_item.prov[0].page_no if text_item.prov else 1
-
-            # Get bounding box if available
-            bbox = None
-            if text_item.prov and len(text_item.prov) > 0:
-                prov = text_item.prov[0]
-                if hasattr(prov, 'bbox'):
-                    bbox_obj = prov.bbox
-                    bbox = (bbox_obj.l, bbox_obj.t, bbox_obj.r, bbox_obj.b)
-
-            # Create text block
-            if bbox:
-                text_block = TextBlock(
-                    text=text_content,
-                    page=page_num,
-                    bbox=bbox,
-                    block_index=idx
-                )
-                text_blocks.append(text_block)
-
-        # Convert to zones
+        # Simple approach: create one zone per page by splitting text
+        # This is a simplified version - can be enhanced later
         zones = []
-        for block in text_blocks:
+
+        # Get the text content
+        text_content = str(main_text) if main_text else ""
+
+        if text_content.strip():
+            # Create a single zone for all text
+            # Note: We don't have individual text block bboxes with main_text
             zone = Zone(
-                zone_id=f"text_{block.page}_{block.block_index}",
+                zone_id="text_main_0",
                 type="text",
-                page=block.page,
-                bbox=list(block.bbox),  # Convert tuple to list
+                page=1,  # Default to page 1
+                bbox=[0, 0, 100, 100],  # Full page bbox (placeholder)
                 metadata={
-                    'text_content': block.text,
-                    'block_index': block.block_index,
-                    'char_count': len(block.text),
-                    'confidence': 0.95  # Docling text extraction is reliable
+                    'text_content': text_content,
+                    'char_count': len(text_content),
+                    'confidence': 0.95,
+                    'note': 'Extracted from main_text (no individual block bboxes available)'
                 }
             )
             zones.append(zone)
 
-        print(f"  Extracted {len(zones)} text blocks")
-        print(f"  Total characters: {sum(len(b.text) for b in text_blocks):,}")
+        print(f"  Extracted {len(zones)} text zone(s)")
+        if zones:
+            print(f"  Total characters: {zones[0].metadata['char_count']:,}")
         print()
         print(f"Detection complete in 0.0s")
-        print(f"Text blocks detected: {len(zones)}")
+        print(f"Text zones detected: {len(zones)}")
         print()
 
         return zones

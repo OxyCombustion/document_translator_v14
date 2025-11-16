@@ -1,0 +1,235 @@
+═══════════════════════════════════════════════════════════════════════════════
+V13 WORKING CODE PATTERNS - EXACT EXCERPTS
+═══════════════════════════════════════════════════════════════════════════════
+
+PATTERN 1: Figure Detection (WORKING)
+FILE: /home/thermodynamics/document_translator_v13/agents/detection/docling_figure_detector.py
+LINES: 90-117
+
+    # Use provided result or run conversion
+    if docling_result:
+        print("Using existing Docling result (from table detection)...")
+        result = docling_result
+    else:
+        print("Running Docling conversion...")
+        result = self.converter.convert(str(pdf_path))  ✅ Key: .convert()
+
+    # Extract figure zones from Docling's document model
+    zones = []
+
+    if hasattr(result, 'document'):  ✅ Key: Check for .document
+        doc = result.document  ✅ Key: Get .document
+
+        # Method 1: Check for pictures collection
+        if hasattr(doc, 'pictures') and doc.pictures:
+            print(f"Found {len(doc.pictures)} pictures in document.pictures")
+            for i, picture in enumerate(doc.pictures):
+                zone = self._picture_to_zone(picture, i)
+                if zone:
+                    zones.append(zone)
+                    print(f"  Picture {i+1}: page {zone.page}, bbox {zone.bbox}")
+
+        # Method 2: Scan page elements for picture items
+        else:
+            print("Scanning page elements for pictures...")
+            picture_count = 0
+            for page_num, page in enumerate(doc.pages, 1):  ✅ Key: .pages works!
+                if hasattr(page, 'children'):
+                    for item in page.children:
+                        # Check if this is a picture element
+                        item_type = type(item).__name__
+                        if 'Picture' in item_type or 'Figure' in item_type or 'Image' in item_type:
+                            zone = self._element_to_zone(item, page_num, picture_count)
+                            if zone:
+                                zones.append(zone)
+                                print(f"  Picture {picture_count+1}: page {page_num}, bbox {zone.bbox}")
+                                picture_count += 1
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PATTERN 2: Table Detection (WORKING)
+FILE: /home/thermodynamics/document_translator_v13/agents/detection/docling_table_detector.py
+LINES: 80-92
+
+    # Use provided result or run conversion
+    if docling_result:
+        print("Using existing Docling result (shared with figures)...")
+        result = docling_result
+    else:
+        print("Running Docling conversion...")
+        result = self.converter.convert(str(pdf_path))  ✅ Key: .convert()
+
+    # Extract table zones
+    zones = []
+
+    if hasattr(result, 'document') and hasattr(result.document, 'tables'):  ✅
+        for i, table in enumerate(result.document.tables):  ✅ Key: .document.tables
+            # Get table location
+            page_num = 1  # Default
+            bbox = [0, 0, 100, 100]  # Default
+
+            # Try to extract page and bbox from table metadata
+            if hasattr(table, 'prov') and table.prov:
+                for prov in table.prov:
+                    if hasattr(prov, 'page_no'):
+                        page_num = prov.page_no
+                    if hasattr(prov, 'bbox'):
+                        bbox_obj = prov.bbox
+                        bbox = [
+                            bbox_obj.l,
+                            bbox_obj.t,
+                            bbox_obj.r,
+                            bbox_obj.b
+                        ]
+
+            # Create zone
+            zone_id = f"table_{i+1}"
+            zone = Zone(
+                zone_id=zone_id,
+                type="table",
+                page=page_num,
+                bbox=bbox,
+                metadata={
+                    'docling_table_index': i,
+                    'detection_method': 'docling',
+                    'markdown': table.export_to_markdown()  ✅ Works!
+                }
+            )
+            zones.append(zone)
+
+            print(f"  Table {i+1}: page {page_num}, bbox {bbox}")
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PATTERN 3: Text Detection (WORKING)
+FILE: /home/thermodynamics/document_translator_v13/agents/detection/docling_text_detector.py
+LINES: 90-103
+
+    # Use existing result or convert
+    if docling_result is None:
+        print("Converting document with Docling...")
+        docling_result = self.converter.convert(str(pdf_path))  ✅ Key: .convert()
+    else:
+        print("Using existing Docling result (shared conversion)...")
+
+    doc = docling_result.document  ✅ Key: .document
+
+    # Extract text blocks
+    print(f"Extracting text blocks...")
+    text_blocks = []
+
+    for idx, text_item in enumerate(doc.texts):  ✅ Key: .texts works!
+        # Get text content
+        text_content = str(text_item.text)
+
+        # Skip empty text blocks
+        if not text_content.strip():
+            continue
+
+        # Get page number (Docling uses 1-based indexing)
+        page_num = text_item.prov[0].page_no if text_item.prov else 1
+
+        # Get bounding box if available
+        bbox = None
+        if text_item.prov and len(text_item.prov) > 0:
+            prov = text_item.prov[0]
+            if hasattr(prov, 'bbox'):
+                bbox_obj = prov.bbox
+                bbox = (bbox_obj.l, bbox_obj.t, bbox_obj.r, bbox_obj.b)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PATTERN 4: Core Docling Extractor (WORKING)
+FILE: /home/thermodynamics/document_translator_v13/core/docling_extractor.py
+LINES: 86-101
+
+    try:
+        logger.info(f"Extracting document with Docling: {pdf_path.name}")
+        
+        # Convert using Docling (V7 approach)
+        result = self.converter.convert(str(pdf_path))  ✅ Key: .convert()
+        doc = result.document  ✅ Key: .document
+        
+        # Extract text (like V7)
+        text_data = doc.export_to_text()  ✅ Works!
+        text_length = len(text_data)
+        
+        logger.info(f"Text extracted: {text_length:,} characters")
+        
+        # Extract tables (like V7)
+        extracted_tables = []
+        
+        for i, table in enumerate(doc.tables):  ✅ Key: .tables works!
+            try:
+                # Get page number (V7 approach)
+                page_num = None
+                if hasattr(table, 'prov') and table.prov:
+                    page_num = table.prov[0].page_no
+                
+                # Export to DataFrame (V7 approach)
+                df = table.export_to_dataframe()  ✅ Works!
+                
+                if not df.empty:
+                    table_data = {
+                        'table_id': i + 1,
+                        'page': page_num,
+                        'shape': df.shape,
+                        'data': df.to_dict('records'),
+                        'source': 'docling',
+                        'processing_stage': 'standard',
+                        'columns': df.columns.tolist(),
+                        'rows': len(df)
+                    }
+                    
+                    extracted_tables.append(table_data)
+                    logger.info(f"Table {i+1} extracted: {df.shape} on page {page_num}")
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WORKING API SEQUENCE:
+
+All 4 files follow this exact pattern:
+
+  1. converter = DocumentConverter()
+  2. result = converter.convert(str(pdf_path))           ← .convert() method
+  3. doc = result.document                               ← .document attribute
+  4. Access via:
+     - doc.pages (iterate through pages)
+     - doc.pictures (pictures collection)
+     - doc.tables (tables collection)
+     - doc.texts (text blocks collection)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+OBJECT HIERARCHY (VERIFIED IN V13):
+
+  converter.convert(pdf_path)
+    └─ Returns: ConversionResult
+       └─ .document (DoclingDocument type)
+          ├─ .pages (list of pages, each with .children)
+          ├─ .pictures (list of picture objects)
+          ├─ .tables (list of table objects)
+          │  └─ .export_to_markdown()
+          │  └─ .export_to_dataframe()
+          └─ .texts (list of text block objects)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT V14 DOES WRONG:
+
+  result = converter.convert_single(pdf_path)  ❌ WRONG METHOD
+  if hasattr(result, 'output'):                ❌ WRONG ATTRIBUTE
+      doc = result.output                      ❌ Gets ExportedCCSDocument
+      for page in enumerate(doc.pages, 1):    ❌ CRASHES - no .pages
+
+═══════════════════════════════════════════════════════════════════════════════
+
+THE FIX:
+
+  Replace in v14 docling_figure_detector.py:
+
+    Line 96:   .convert_single() → .convert()
+    Line 101:  hasattr(..., 'output') → hasattr(..., 'document')
+    Line 102:  .output → .document
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any
 
 import fitz  # PyMuPDF
-from src.infra.agent_logger import AgentLogger, AgentRunRecord
+from curation_v14_P3.src.infrastructure.agent_logger import AgentLogger, AgentRunRecord
 import time
 
 

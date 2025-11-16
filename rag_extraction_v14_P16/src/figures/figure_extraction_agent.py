@@ -49,7 +49,7 @@ import numpy as np
 from PIL import Image
 
 # Import base agent (proper package import, no sys.path manipulation)
-from common.src.base.base_agent import BaseExtractionAgent, Zone, ExtractedObject
+from common.src.base.base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
 
 
 class PlotImageClassifier:

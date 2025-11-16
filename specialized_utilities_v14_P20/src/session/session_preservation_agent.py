@@ -47,14 +47,10 @@ import hashlib
 import logging
 
 # V9 imports
-try:
-    from ..base import BaseAgent, AgentResult, AgentStatus
-    from ...core.logger import setup_logger
-    from ...core.context_loader import load_agent_context
-except ImportError:
-    from common.src.base.base_agent import BaseAgent, AgentResult, AgentStatus
-    from core.logger import setup_logger
-    from core.context_loader import load_agent_context
+# V14 imports (updated from v13 imports)
+from common.src.base.base_agent import BaseAgent, AgentResult, AgentStatus
+from common.src.logging.logger import setup_logger
+from common.src.context.context_loader import load_agent_context
 
 
 class SessionPreservationAgent(BaseAgent):

@@ -98,38 +98,25 @@ class DoclingFigureDetector:
         # Extract figure zones from Docling's document model
         zones = []
 
-        # Use result.document (v13 API, has .pages) instead of result.output
-        if hasattr(result, 'document'):
-            doc = result.document
-        elif hasattr(result, 'output'):
-            doc = result.output
+        # Use result.output.figures (current Docling API)
+        if not hasattr(result, 'output'):
+            print("⚠️  No 'output' attribute on ConversionResult")
+            return zones
 
-        # Method 1: Check for pictures collection
-        if hasattr(doc, 'pictures') and doc.pictures:
-            print(f"Found {len(doc.pictures)} pictures in document.pictures")
-            for i, picture in enumerate(doc.pictures):
-                zone = self._picture_to_zone(picture, i)
-                if zone:
-                    zones.append(zone)
-                    print(f"  Picture {i+1}: page {zone.page}, bbox {zone.bbox}")
+        output = result.output
+        if not hasattr(output, 'figures'):
+            print("⚠️  No 'figures' attribute on ExportedCCSDocument")
+            return zones
 
-        # Method 2: Scan page elements for picture items
-        elif hasattr(doc, 'pages'):
-            print("Scanning page elements for pictures...")
-            picture_count = 0
-            for page_num, page in enumerate(doc.pages, 1):
-                if hasattr(page, 'children'):
-                    for item in page.children:
-                        # Check if this is a picture element
-                        item_type = type(item).__name__
-                        if 'Picture' in item_type or 'Figure' in item_type or 'Image' in item_type:
-                            zone = self._element_to_zone(item, page_num, picture_count)
-                            if zone:
-                                zones.append(zone)
-                                print(f"  Picture {picture_count+1}: page {page_num}, bbox {zone.bbox}")
-                                picture_count += 1
-        else:
-            print("⚠️  No .pictures or .pages found on document object")
+        figures = output.figures
+        print(f"Using result.output.figures (current Docling API)")
+        print(f"Found {len(figures)} figures")
+
+        for i, figure in enumerate(figures):
+            zone = self._figure_to_zone(figure, i)
+            if zone:
+                zones.append(zone)
+                print(f"  Figure {i+1}: page {zone.page}, bbox {zone.bbox}")
 
         duration = (datetime.now() - start_time).total_seconds()
 
@@ -139,6 +126,50 @@ class DoclingFigureDetector:
         print()
 
         return zones
+
+    def _figure_to_zone(self, figure, index: int) -> Zone:
+        """Convert Docling figure object to Zone (current API)."""
+        try:
+            # Get figure location
+            page_num = 1  # Default
+            bbox = [0, 0, 100, 100]  # Default
+
+            # Try to extract page and bbox from figure metadata
+            if hasattr(figure, 'prov') and figure.prov:
+                for prov in figure.prov:
+                    if hasattr(prov, 'page_no'):
+                        page_num = prov.page_no
+                    if hasattr(prov, 'bbox'):
+                        bbox_obj = prov.bbox
+                        # Handle both list and object bbox formats
+                        if isinstance(bbox_obj, list) and len(bbox_obj) == 4:
+                            bbox = bbox_obj
+                        elif hasattr(bbox_obj, 'l'):
+                            bbox = [
+                                bbox_obj.l,
+                                bbox_obj.t,
+                                bbox_obj.r,
+                                bbox_obj.b
+                            ]
+
+            # Create zone
+            zone_id = f"fig_docling_{page_num}_{index}"
+            zone = Zone(
+                zone_id=zone_id,
+                type="figure",
+                page=page_num,
+                bbox=bbox,
+                metadata={
+                    'docling_figure_index': index,
+                    'detection_method': 'docling',
+                    'caption': getattr(figure, 'caption', '') if hasattr(figure, 'caption') else ''
+                }
+            )
+            return zone
+
+        except Exception as e:
+            print(f"    ⚠️  Failed to convert figure {index}: {e}")
+            return None
 
     def _picture_to_zone(self, picture, index: int) -> Zone:
         """Convert Docling picture object to Zone."""

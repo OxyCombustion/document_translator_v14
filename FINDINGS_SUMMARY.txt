@@ -1,0 +1,157 @@
+================================================================================
+DOCLING API FIX - V13 WORKING PATTERN ANALYSIS
+================================================================================
+
+TASK: Find how Docling was successfully used in v13 to extract figures
+
+RESULT: FOUND - Complete working pattern identified and documented
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+1. THE PROBLEM (V14 Current State)
+   Error: 'ExportedCCSDocument' object has no attribute 'pages'
+   Location: /home/thermodynamics/document_translator_v14/detection_v14_P14/src/docling/docling_figure_detector.py:117
+   Root Cause: Using wrong Docling API method and attribute
+
+2. THE SOLUTION (V13 Working Pattern)
+   File: /home/thermodynamics/document_translator_v13/agents/detection/docling_figure_detector.py
+   Status: VERIFIED WORKING
+   
+3. THE FIX (3 Lines to Change)
+   Line 96:  converter.convert_single(pdf_path) → converter.convert(str(pdf_path))
+   Line 101: hasattr(result, 'output') → hasattr(result, 'document')
+   Line 102: doc = result.output → doc = result.document
+
+================================================================================
+COMPLETE WORKING PATTERN FROM V13
+================================================================================
+
+STEP 1: Initialize Converter
+  from docling.document_converter import DocumentConverter
+  converter = DocumentConverter()
+
+STEP 2: Convert PDF
+  result = converter.convert(str(pdf_path))  ← Key: Use .convert(), not .convert_single()
+
+STEP 3: Access Document
+  doc = result.document  ← Key: Use .document, not .output
+
+STEP 4: Access Data
+  - doc.pages (iterate through pages)
+  - doc.pictures (collection of pictures)
+  - doc.tables (collection of tables)
+  - doc.texts (collection of text blocks)
+  
+STEP 5: Get Element Details
+  - page.children (elements on that page)
+  - table.export_to_markdown() (convert table)
+  - table.export_to_dataframe() (pandas dataframe)
+  - picture.prov (provenance/location info)
+
+================================================================================
+V13 VERIFICATION - 4 WORKING FILES
+================================================================================
+
+File 1: docling_figure_detector.py
+  Location: /home/thermodynamics/document_translator_v13/agents/detection/docling_figure_detector.py
+  Pattern: result.converter.convert(str(path)) → result.document → doc.pages
+  Status: ✅ WORKING
+
+File 2: docling_table_detector.py
+  Location: /home/thermodynamics/document_translator_v13/agents/detection/docling_table_detector.py
+  Pattern: result.converter.convert(str(path)) → result.document → result.document.tables
+  Status: ✅ WORKING
+
+File 3: docling_text_detector.py
+  Location: /home/thermodynamics/document_translator_v13/agents/detection/docling_text_detector.py
+  Pattern: docling_result.document → doc.texts
+  Status: ✅ WORKING
+
+File 4: docling_extractor.py
+  Location: /home/thermodynamics/document_translator_v13/core/docling_extractor.py
+  Pattern: result = converter.convert(str(path)) → doc = result.document
+  Status: ✅ WORKING
+
+================================================================================
+EXACT CODE SNIPPETS
+================================================================================
+
+V13 (WORKING):
+  result = self.converter.convert(str(pdf_path))
+  if hasattr(result, 'document'):
+      doc = result.document
+      for page_num, page in enumerate(doc.pages, 1):
+          # process pages...
+          
+V14 (BROKEN):
+  result = self.converter.convert_single(pdf_path)  ❌
+  if hasattr(result, 'output'):  ❌
+      doc = result.output  ❌
+      for page_num, page in enumerate(doc.pages, 1):  ❌ CRASHES
+
+================================================================================
+WHY THIS WORKS
+================================================================================
+
+Docling API Structure:
+  converter.convert(path) 
+    → ConversionResult object
+      → .document attribute (DoclingDocument type)
+        → .pages (list of pages)
+        → .pictures (list of pictures)
+        → .tables (list of tables)
+        → .texts (list of text blocks)
+
+V14 was trying:
+  converter.convert_single(path) 
+    → Different object type (ExportedCCSDocument)
+      → .output attribute (not .document)
+        → No .pages attribute (AttributeError)
+
+================================================================================
+REFERENCE MATERIAL
+================================================================================
+
+Analysis Document 1: docling_v13_vs_v14_analysis.md
+  - Comprehensive comparison
+  - Document structure visualization
+  - Root cause analysis
+  - Fix required section
+
+Analysis Document 2: v13_v14_code_comparison.md
+  - Side-by-side code comparison
+  - File 1: Figure Detection
+  - File 2: Table Detection
+  - File 3: Docling Extractor
+  - Why it happened explanation
+  - Verification checklist
+
+Both documents saved to /tmp/ for reference.
+
+================================================================================
+IMPLEMENTATION STATUS
+================================================================================
+
+To fix V14 docling_figure_detector.py:
+
+1. Change line 96:
+   FROM: result = self.converter.convert_single(pdf_path)
+   TO:   result = self.converter.convert(str(pdf_path))
+
+2. Change line 101:
+   FROM: if hasattr(result, 'output'):
+   TO:   if hasattr(result, 'document'):
+
+3. Change line 102:
+   FROM: doc = result.output
+   TO:   doc = result.document
+
+4. Rest of code (lines 105-127) will work correctly
+
+Test with: python docling_figure_detector.py <pdf_path>
+
+Expected result: Figures detected successfully using correct API
+
+================================================================================

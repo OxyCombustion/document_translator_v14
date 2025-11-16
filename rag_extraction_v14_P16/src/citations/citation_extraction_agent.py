@@ -46,7 +46,7 @@ if sys.platform == 'win32':
             pass
 
 # Import base structures
-from base_extraction_agent import ExtractedObject
+from common.src.base.base_extraction_agent import ExtractedObject
 
 
 @dataclass

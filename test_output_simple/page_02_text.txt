@@ -1,0 +1,271 @@
+4-2
+Steam 42 / Heat Transfer
+The Babcock & Wilcox Company
+­A	
+surface area, ft2 (m2)
+cp 
+specific heat at constant pressure, Btu/lb F (J/kg K)
+Cf	
+cleanliness factor, dimensionless
+Ct	
+thermal capacitance, Btu/ft3 F (J/m3 K)
+C	
+electrical capacitance, farad
+D	
+diameter, ft (m)
+De	
+equivalent diameter, ft (m)
+Eb	
+blackbody emissive power, Btu/h ft2 (W/m2)
+F 
+radiation configuration factor, dimensionless
+F	
+heat exchanger arrangement factor, dimensionless
+Fa 
+crossflow arrangement factor, dimensionless
+Fd	
+tube bundle depth factor, dimensionless
+Fpp 
+fluid property factor, see text
+FT 
+fluid temperature factor, dimensionless
+F	
+total radiation exchange factor, dimensionless
+g	
+acceleration of gravity, 32.17 ft/s2 (9.8 m/s2)
+G	
+incident thermal radiation, Btu/h ft2 (W/m2)
+G 
+mass flux or mass velocity, lb/h ft2 (kg/m2 s)
+h 
+heat transfer coefficient, Btu/h ft2 F (W/m2 K)
+hc 
+crossflow heat transfer coef., Btu/h ft2 F (W/m2 K)
+hct 
+contact coefficient, Btu/h ft2 F (W/m2 K)
+	
+crossflow velocity and geometry factor, see text
+hl	
+longitudinal heat transfer coef., Btu/h ft2 F (W/m2 K)
+	
+longitudinal flow velocity and geometry factor, see text
+H 
+enthalpy, Btu/lb (J/kg)
+Hfg 
+latent heat of vaporization, Btu/lb (J/kg)
+I	
+electrical current, amperes
+J	
+radiosity, Btu/h ft2 (W/m2)
+k	
+thermal conductivity, Btu/h ft F (W/m K)
+K	
+thermal conductance, Btu/h F (W/K)
+Ky 
+mass transfer coefficient, lb/ft2 s (kg/m2 s)
+L	
+beam length, ft (m)
+L, 	 length or dimension, ft (m)
+Lh 
+fin height, ft (m)
+Lt 
+fin spacing, ft (m)
+	
+mass flow rate, lb/h (kg/s)
+p	
+pressure or partial pressure, atm (Pa)
+P	
+temp. ratio for surface arrgt. factor, dimensionless
+q 
+heat flow rate, Btu/h (W)
+	
+volumetric heat generation rate, Btu/h ft3 (W/m3)
+qrel	
+heat release, Btu/h ft3 (W/m3)
+r	
+radius, ft (m)
+R	
+electrical resistance (ohms)
+R	
+temp. ratio for surface arrgt. factor, dimensionless
+R	
+thermal resistance, h F/Btu (K/W)
+R	
+radiative resistance, 1/ft2 (1/m2)
+Rf	
+fouling factor, h ft2 F/Btu (m2 K/W)
+S 
+total exposed surface area for a finned surface, ft2 (m2)
+Sf 
+fin surface area; sides plus peripheral area, ft2 (m2)
+SH	
+source term for internal heat generation, Btu/h ft3 
+(W/m3)
+t	
+time, s or h, see text (s)
+T	
+temperature, F or R (C or K)
+T°	
+temperature at initial time, F (C) 
+∆t	
+time interval, s
+∆T	
+temperature difference, F (C) 
+∆TLMTD	log mean temperature difference, F (C)
+u,v,w	velocity in x, y, z coordinates respectively, ft/s (m/s)
+U	
+overall heat transfer coef., Btu/h ft2 F (W/m2 K)
+V	
+electrical voltage, volts
+V	
+velocity, ft/s (m/s)
+V	
+volume, ft3 (m3)
+′
+hc
+′
+hl
+m
+′′′
+q
+Nomenclature
+x	
+dimension, ft (m)
+x,y,z	 dimensions in Cartesian coordinate system, ft (m)
+∆x	
+change in length, ft (m)
+Y 
+Schmidt fin geometry factor, dimensionless
+Yg 
+concentration in bulk fluid, lb/lb (kg/kg)
+Yi	
+concentration at condensate interface, lb/lb (kg/kg)
+Z 
+Schmidt fin geometry factor, dimensionless
+α	
+absorptivity, or total absorptance, dimensionless
+β 
+volume coefficient of expansion, 1/R (1/K)
+Γ 
+effective diffusion coefficient, lb/ft s (kg/m s)
+ε	
+emissivity, or total emittance, dimensionless
+η	
+Schmidt fin efficiency, dimensionless
+µ	
+dynamic viscosity, lbm/ft s (kg/m s)
+ρ	
+density, lb/ft3 (kg/m3)
+ρ 
+reflectivity, dimensionless
+σ	
+Stefan-Boltzmann constant, 0.1713 × 10-8 Btu/h ft2
+	
+R4 (5.669 × 10-8 W/m2 K4)
+τ	
+transmissivity, dimensionless
+Subscripts:
+b	
+bulk
+c	
+conduction
+ct	
+contact
+cv	
+convection
+e	
+node point east
+eff	
+effective
+f 
+film or fin
+fd	
+fully developed
+g	
+gas
+i	
+inside or ith parameter
+j	
+jth parameter
+o	
+outside
+p	
+node point under evaluation
+r	
+radiation
+s	
+surface
+sg	
+surface to gas
+w	
+node point west
+w	
+wall
+δ 
+liquid film surface (gas liquid interface)
+∞	
+free stream conditions
+⊥ 
+perpendicular to flow
+P 
+parallel to flow
+Dimensionless groups:
+Gr =
+Grashof number
+Nu
+Nusselt number
+Pe
+P
+g
+T
+T
+L
+hL
+k
+s
+β
+ρ
+µ
+−
+(
+)
+=
+=
+∞
+2
+3
+2
+Re
+r
+Pr
+r
+Peclet number
+Prandtl number
+Ra
+Gr P
+Rayleigh number
+=
+=
+c
+k
+p µ
+Re
+Reynolds number
+St
+Nu
+P
+Stanton number
+=
+=
+=
+=
+ρ
+µ
+µ
+V L
+G L
+h
+c G
+p
+Re
+r

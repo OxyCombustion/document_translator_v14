@@ -14,15 +14,10 @@ from datetime import datetime
 
 import sys
 
-# Fix relative imports
-try:
-    from ..base import BaseAgent, AgentResult
-    from ...core.logger import get_logger
-    from .test_tracking import TestResultTracker
-except ImportError:
-    from common.src.base.base_agent import BaseAgent, AgentResult
-    from core.logger import get_logger
-    from agents.documentation_agent.test_tracking import TestResultTracker
+# V14 imports (updated from v13 imports)
+from common.src.base.base_agent import BaseAgent, AgentResult
+from common.src.logging.logger import get_logger
+from .test_tracking import TestResultTracker
 
 logger = get_logger("DocumentationAgent")
 
