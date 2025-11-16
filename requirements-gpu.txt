@@ -1,0 +1,102 @@
+# Document Translator V14 - GPU Requirements
+# Generated: 2025-11-15
+# Python Version: >=3.11
+
+# Note: This file provides GPU-accelerated alternatives to CPU-only requirements
+# Choose ONE of the GPU options below based on your hardware
+
+# ============================================================================
+# NVIDIA CUDA GPU SUPPORT
+# ============================================================================
+
+# Option 1: PyTorch with CUDA 11.8
+# Uncomment for CUDA 11.8 support:
+# --extra-index-url https://download.pytorch.org/whl/cu118
+# torch>=2.0.0+cu118
+# torchvision>=0.15.0+cu118
+# torchaudio>=2.0.0+cu118
+
+# Option 2: PyTorch with CUDA 12.1 (recommended for newer GPUs)
+# Uncomment for CUDA 12.1 support:
+# --extra-index-url https://download.pytorch.org/whl/cu121
+# torch>=2.0.0+cu121
+# torchvision>=0.15.0+cu121
+# torchaudio>=2.0.0+cu121
+
+# ============================================================================
+# AMD ROCm GPU SUPPORT
+# ============================================================================
+
+# Option 3: PyTorch with ROCm (for AMD GPUs)
+# Uncomment for ROCm support:
+# --extra-index-url https://download.pytorch.org/whl/rocm5.6
+# torch>=2.0.0+rocm5.6
+# torchvision>=0.15.0+rocm5.6
+# torchaudio>=2.0.0+rocm5.6
+
+# ============================================================================
+# INTEL GPU SUPPORT (Experimental)
+# ============================================================================
+
+# Option 4: Intel Extension for PyTorch (for Intel GPUs like Arc B580)
+# Note: Install CPU version of PyTorch first, then add Intel extension
+# torch>=2.0.0  # CPU version
+# intel-extension-for-pytorch>=2.0.0
+
+# Intel GPU Drivers Required:
+# - Intel Graphics Driver (latest)
+# - Intel oneAPI Base Toolkit
+# See: https://intel.github.io/intel-extension-for-pytorch/
+
+# ============================================================================
+# GPU-ACCELERATED LIBRARIES
+# ============================================================================
+
+# RAPIDS cuDF (NVIDIA only) - GPU-accelerated pandas
+# Uncomment for NVIDIA GPUs:
+# cudf-cu11>=23.10.0  # For CUDA 11
+# cudf-cu12>=23.10.0  # For CUDA 12
+
+# CuPy - GPU-accelerated NumPy (NVIDIA only)
+# Uncomment for NVIDIA GPUs:
+# cupy-cuda11x>=12.0.0  # For CUDA 11
+# cupy-cuda12x>=12.0.0  # For CUDA 12
+
+# ============================================================================
+# INSTALLATION INSTRUCTIONS
+# ============================================================================
+
+# Step 1: Install base requirements
+# pip install -r requirements.txt
+
+# Step 2: REMOVE CPU-only PyTorch
+# pip uninstall torch torchvision torchaudio
+
+# Step 3: Choose your GPU option above and uncomment the lines
+
+# Step 4: Install GPU requirements
+# pip install -r requirements-gpu.txt
+
+# Step 5: Verify GPU detection
+# python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+# python -c "import intel_extension_for_pytorch as ipex; print(f'XPU available: {ipex.xpu.is_available()}')"  # For Intel
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# GPU Memory Requirements:
+# - Minimum: 8GB VRAM (for basic extraction)
+# - Recommended: 12GB+ VRAM (for full pipeline)
+# - Optimal: 16GB+ VRAM (for large documents)
+
+# Performance Improvements with GPU:
+# - PDF rendering: 2-3x faster
+# - OCR processing: 5-10x faster
+# - ML inference: 10-50x faster
+# - Vector embeddings: 10-20x faster
+
+# Troubleshooting:
+# - If CUDA/ROCm not detected, verify drivers are installed
+# - For Intel GPUs, ensure oneAPI runtime is in PATH
+# - Check GPU memory usage with nvidia-smi (NVIDIA) or intel_gpu_top (Intel)

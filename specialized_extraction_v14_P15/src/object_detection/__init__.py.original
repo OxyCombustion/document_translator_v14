@@ -1,0 +1,5 @@
+"""Object Detection Agent for Document Translator V9"""
+
+from .document_object_agent import DocumentObjectAgent, DocumentObject, ObjectType
+
+__all__ = ["DocumentObjectAgent", "DocumentObject", "ObjectType"]

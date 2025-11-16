@@ -1,0 +1,88 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    DOCLING API FIX - QUICK REFERENCE                           ║
+║                     (Fix for v14 figure detector error)                         ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+ERROR MESSAGE:
+  AttributeError: 'ExportedCCSDocument' object has no attribute 'pages'
+  Location: detection_v14_P14/src/docling/docling_figure_detector.py:117
+
+ROOT CAUSE:
+  V14 code using wrong Docling API methods and attributes
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SOLUTION: Replace 3 Lines in docling_figure_detector.py
+
+Line 96:   converter.convert_single(pdf_path)
+Replace:   converter.convert(str(pdf_path))
+
+Line 101:  if hasattr(result, 'output'):
+Replace:   if hasattr(result, 'document'):
+
+Line 102:  doc = result.output
+Replace:   doc = result.document
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WORKING API PATTERN (from V13):
+
+  Step 1: Initialize
+    converter = DocumentConverter()
+
+  Step 2: Convert PDF
+    result = converter.convert(str(pdf_path))  ← .convert() not .convert_single()
+
+  Step 3: Access Document
+    doc = result.document  ← .document not .output
+
+  Step 4: Iterate Pages
+    for page_num, page in enumerate(doc.pages, 1):
+        # Process page elements...
+
+═══════════════════════════════════════════════════════════════════════════════
+
+COMPLETE DOCLING API STRUCTURE:
+
+  converter.convert(pdf_path)
+    └── Returns: ConversionResult
+        ├── .document (DoclingDocument)
+        │   ├── .pages (List of pages)
+        │   ├── .pictures (List of pictures)
+        │   ├── .tables (List of tables)
+        │   ├── .texts (List of text blocks)
+        │   ├── export_to_text()
+        │   └── export_to_markdown()
+        │
+        └── .metadata (Document info)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PROOF: 4 Working Files in V13
+
+  ✅ agents/detection/docling_figure_detector.py (uses result.document)
+  ✅ agents/detection/docling_table_detector.py (uses result.document.tables)
+  ✅ agents/detection/docling_text_detector.py (uses doc.texts)
+  ✅ core/docling_extractor.py (uses result.document)
+
+All these files use the .document pattern and work correctly in V13.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+IMPLEMENTATION CHECKLIST:
+
+  [ ] Change line 96: .convert_single() → .convert()
+  [ ] Change line 101: hasattr(..., 'output') → hasattr(..., 'document')
+  [ ] Change line 102: .output → .document
+  [ ] Test with: python docling_figure_detector.py <pdf_path>
+  [ ] Verify: Figures detected without AttributeError
+
+═══════════════════════════════════════════════════════════════════════════════
+
+REFERENCES:
+
+  FINDINGS_SUMMARY.txt ........................ This quick reference
+  docling_v13_vs_v14_analysis.md ............ Detailed analysis
+  v13_v14_code_comparison.md ............... Side-by-side code comparison
+
+═══════════════════════════════════════════════════════════════════════════════

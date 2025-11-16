@@ -1,0 +1,6 @@
+# Session Preservation Agent Package
+# Comprehensive session state capture and git management for V9
+
+from .session_preservation_agent import SessionPreservationAgent
+
+__all__ = ['SessionPreservationAgent']

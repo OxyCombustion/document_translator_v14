@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocLayout-YOLO Equation Detection Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-weight: 500;
+        }
+
+        .control-group input[type="range"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .threshold-value {
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .equations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .equation-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .equation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .equation-card.hidden {
+            display: none;
+        }
+
+        .equation-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background: #f9f9f9;
+            padding: 1rem;
+            cursor: pointer;
+        }
+
+        .equation-info {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .equation-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .equation-num {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .page-num {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .confidence {
+            font-weight: bold;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .conf-excellent {
+            background: #10b981;
+            color: white;
+        }
+
+        .conf-good {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .conf-fair {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            margin: 2% auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #bbb;
+        }
+
+        .info-banner {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        .info-banner strong {
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔍 DocLayout-YOLO Equation Detection Viewer</h1>
+            <p class="subtitle">Interactive viewer for Ch-04 Heat Transfer equation extraction results</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="info-banner">
+            <strong>✅ V13 Working Approach Restored:</strong> DocLayout-YOLO vision-based detection ported from v13 to v14.
+            This viewer shows all 222 detected equations from the working v13 approach (vs 0 equations from broken Docling 2.x approach).
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">222</div>
+                <div class="stat-label">Total Equations Detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0.901</div>
+                <div class="stat-label">Average Confidence</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0.270 - 0.970</div>
+                <div class="stat-label">Confidence Range</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">22</div>
+                <div class="stat-label">Pages with Equations</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3 style="margin-bottom: 1rem;">Confidence Distribution</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">4</div>
+                    <div style="color: #666; font-size: 0.85rem;">0.80-0.85</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">98</div>
+                    <div style="color: #666; font-size: 0.85rem;">0.85-0.90</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">78</div>
+                    <div style="color: #666; font-size: 0.85rem;">0.90-0.95</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #059669;">39</div>
+                    <div style="color: #666; font-size: 0.85rem;">0.95-1.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="confThreshold">Confidence Threshold:</label>
+                <input type="range" id="confThreshold" min="0.5" max="1.0" step="0.01" value="0.0">
+                <span class="threshold-value" id="thresholdValue">0.00</span>
+                <span id="filteredCount">222 equations</span>
+            </div>
+            <div class="control-group" style="margin-top: 1rem;">
+                <label for="sortBy">Sort By:</label>
+                <select id="sortBy">
+                    <option value="equation">Equation Number</option>
+                    <option value="page">Page Number</option>
+                    <option value="confidence">Confidence (High to Low)</option>
+                    <option value="confidence-asc">Confidence (Low to High)</option>
+                </select>
+                <label for="filterPage">Filter by Page:</label>
+                <select id="filterPage">
+                    <option value="all">All Pages</option>
+                    <option value="2">Page 2</option> <option value="4">Page 4</option> <option value="5">Page 5</option> <option value="6">Page 6</option> <option value="7">Page 7</option> <option value="8">Page 8</option> <option value="9">Page 9</option> <option value="10">Page 10</option> <option value="13">Page 13</option> <option value="15">Page 15</option> <option value="16">Page 16</option> <option value="17">Page 17</option> <option value="18">Page 18</option> <option value="20">Page 20</option> <option value="21">Page 21</option> <option value="22">Page 22</option> <option value="23">Page 23</option> <option value="24">Page 24</option> <option value="30">Page 30</option> <option value="31">Page 31</option> <option value="32">Page 32</option> <option value="33">Page 33</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="equations-grid" id="equationsGrid">
+            <!-- Equations will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        const equations = [{"equation_num": 1, "page": 2, "confidence": 0.93, "filename": "equation_001_page2_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_001_page2_conf0.93.png"}, {"equation_num": 2, "page": 2, "confidence": 0.92, "filename": "equation_002_page2_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_002_page2_conf0.92.png"}, {"equation_num": 3, "page": 2, "confidence": 0.91, "filename": "equation_003_page2_conf0.91.png", "filepath": "results/doclayout_yolo_test/equation_003_page2_conf0.91.png"}, {"equation_num": 4, "page": 2, "confidence": 0.88, "filename": "equation_004_page2_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_004_page2_conf0.88.png"}, {"equation_num": 5, "page": 2, "confidence": 0.88, "filename": "equation_005_page2_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_005_page2_conf0.88.png"}, {"equation_num": 6, "page": 2, "confidence": 0.87, "filename": "equation_006_page2_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_006_page2_conf0.87.png"}, {"equation_num": 7, "page": 4, "confidence": 0.93, "filename": "equation_007_page4_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_007_page4_conf0.93.png"}, {"equation_num": 8, "page": 4, "confidence": 0.9, "filename": "equation_008_page4_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_008_page4_conf0.90.png"}, {"equation_num": 9, "page": 4, "confidence": 0.88, "filename": "equation_009_page4_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_009_page4_conf0.88.png"}, {"equation_num": 10, "page": 4, "confidence": 0.87, "filename": "equation_010_page4_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_010_page4_conf0.87.png"}, {"equation_num": 11, "page": 5, "confidence": 0.94, "filename": "equation_011_page5_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_011_page5_conf0.94.png"}, {"equation_num": 12, "page": 5, "confidence": 0.93, "filename": "equation_012_page5_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_012_page5_conf0.93.png"}, {"equation_num": 13, "page": 5, "confidence": 0.93, "filename": "equation_013_page5_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_013_page5_conf0.93.png"}, {"equation_num": 14, "page": 5, "confidence": 0.93, "filename": "equation_014_page5_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_014_page5_conf0.93.png"}, {"equation_num": 15, "page": 5, "confidence": 0.92, "filename": "equation_015_page5_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_015_page5_conf0.92.png"}, {"equation_num": 16, "page": 5, "confidence": 0.92, "filename": "equation_016_page5_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_016_page5_conf0.92.png"}, {"equation_num": 17, "page": 5, "confidence": 0.92, "filename": "equation_017_page5_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_017_page5_conf0.92.png"}, {"equation_num": 18, "page": 5, "confidence": 0.9, "filename": "equation_018_page5_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_018_page5_conf0.90.png"}, {"equation_num": 19, "page": 5, "confidence": 0.9, "filename": "equation_019_page5_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_019_page5_conf0.90.png"}, {"equation_num": 20, "page": 5, "confidence": 0.89, "filename": "equation_020_page5_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_020_page5_conf0.89.png"}, {"equation_num": 21, "page": 5, "confidence": 0.88, "filename": "equation_021_page5_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_021_page5_conf0.88.png"}, {"equation_num": 22, "page": 5, "confidence": 0.88, "filename": "equation_022_page5_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_022_page5_conf0.88.png"}, {"equation_num": 23, "page": 5, "confidence": 0.88, "filename": "equation_023_page5_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_023_page5_conf0.88.png"}, {"equation_num": 24, "page": 5, "confidence": 0.88, "filename": "equation_024_page5_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_024_page5_conf0.88.png"}, {"equation_num": 25, "page": 5, "confidence": 0.87, "filename": "equation_025_page5_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_025_page5_conf0.87.png"}, {"equation_num": 26, "page": 5, "confidence": 0.87, "filename": "equation_026_page5_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_026_page5_conf0.87.png"}, {"equation_num": 27, "page": 5, "confidence": 0.87, "filename": "equation_027_page5_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_027_page5_conf0.87.png"}, {"equation_num": 28, "page": 5, "confidence": 0.87, "filename": "equation_028_page5_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_028_page5_conf0.87.png"}, {"equation_num": 29, "page": 6, "confidence": 0.95, "filename": "equation_029_page6_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_029_page6_conf0.95.png"}, {"equation_num": 30, "page": 6, "confidence": 0.95, "filename": "equation_030_page6_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_030_page6_conf0.95.png"}, {"equation_num": 31, "page": 6, "confidence": 0.95, "filename": "equation_031_page6_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_031_page6_conf0.95.png"}, {"equation_num": 32, "page": 6, "confidence": 0.95, "filename": "equation_032_page6_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_032_page6_conf0.95.png"}, {"equation_num": 33, "page": 6, "confidence": 0.94, "filename": "equation_033_page6_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_033_page6_conf0.94.png"}, {"equation_num": 34, "page": 6, "confidence": 0.92, "filename": "equation_034_page6_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_034_page6_conf0.92.png"}, {"equation_num": 35, "page": 6, "confidence": 0.92, "filename": "equation_035_page6_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_035_page6_conf0.92.png"}, {"equation_num": 36, "page": 6, "confidence": 0.92, "filename": "equation_036_page6_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_036_page6_conf0.92.png"}, {"equation_num": 37, "page": 6, "confidence": 0.9, "filename": "equation_037_page6_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_037_page6_conf0.90.png"}, {"equation_num": 38, "page": 6, "confidence": 0.89, "filename": "equation_038_page6_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_038_page6_conf0.89.png"}, {"equation_num": 39, "page": 6, "confidence": 0.89, "filename": "equation_039_page6_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_039_page6_conf0.89.png"}, {"equation_num": 40, "page": 6, "confidence": 0.89, "filename": "equation_040_page6_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_040_page6_conf0.89.png"}, {"equation_num": 41, "page": 6, "confidence": 0.89, "filename": "equation_041_page6_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_041_page6_conf0.89.png"}, {"equation_num": 42, "page": 6, "confidence": 0.88, "filename": "equation_042_page6_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_042_page6_conf0.88.png"}, {"equation_num": 43, "page": 6, "confidence": 0.88, "filename": "equation_043_page6_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_043_page6_conf0.88.png"}, {"equation_num": 44, "page": 6, "confidence": 0.87, "filename": "equation_044_page6_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_044_page6_conf0.87.png"}, {"equation_num": 45, "page": 6, "confidence": 0.86, "filename": "equation_045_page6_conf0.86.png", "filepath": "results/doclayout_yolo_test/equation_045_page6_conf0.86.png"}, {"equation_num": 46, "page": 6, "confidence": 0.86, "filename": "equation_046_page6_conf0.86.png", "filepath": "results/doclayout_yolo_test/equation_046_page6_conf0.86.png"}, {"equation_num": 47, "page": 7, "confidence": 0.94, "filename": "equation_047_page7_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_047_page7_conf0.94.png"}, {"equation_num": 48, "page": 7, "confidence": 0.93, "filename": "equation_048_page7_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_048_page7_conf0.93.png"}, {"equation_num": 49, "page": 7, "confidence": 0.93, "filename": "equation_049_page7_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_049_page7_conf0.93.png"}, {"equation_num": 50, "page": 7, "confidence": 0.93, "filename": "equation_050_page7_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_050_page7_conf0.93.png"}, {"equation_num": 51, "page": 7, "confidence": 0.9, "filename": "equation_051_page7_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_051_page7_conf0.90.png"}, {"equation_num": 52, "page": 7, "confidence": 0.89, "filename": "equation_052_page7_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_052_page7_conf0.89.png"}, {"equation_num": 53, "page": 7, "confidence": 0.89, "filename": "equation_053_page7_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_053_page7_conf0.89.png"}, {"equation_num": 54, "page": 7, "confidence": 0.87, "filename": "equation_054_page7_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_054_page7_conf0.87.png"}, {"equation_num": 55, "page": 8, "confidence": 0.96, "filename": "equation_055_page8_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_055_page8_conf0.96.png"}, {"equation_num": 56, "page": 8, "confidence": 0.94, "filename": "equation_056_page8_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_056_page8_conf0.94.png"}, {"equation_num": 57, "page": 8, "confidence": 0.94, "filename": "equation_057_page8_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_057_page8_conf0.94.png"}, {"equation_num": 58, "page": 8, "confidence": 0.93, "filename": "equation_058_page8_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_058_page8_conf0.93.png"}, {"equation_num": 59, "page": 8, "confidence": 0.93, "filename": "equation_059_page8_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_059_page8_conf0.93.png"}, {"equation_num": 60, "page": 8, "confidence": 0.92, "filename": "equation_060_page8_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_060_page8_conf0.92.png"}, {"equation_num": 61, "page": 8, "confidence": 0.89, "filename": "equation_061_page8_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_061_page8_conf0.89.png"}, {"equation_num": 62, "page": 8, "confidence": 0.87, "filename": "equation_062_page8_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_062_page8_conf0.87.png"}, {"equation_num": 63, "page": 8, "confidence": 0.87, "filename": "equation_063_page8_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_063_page8_conf0.87.png"}, {"equation_num": 64, "page": 8, "confidence": 0.87, "filename": "equation_064_page8_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_064_page8_conf0.87.png"}, {"equation_num": 65, "page": 8, "confidence": 0.87, "filename": "equation_065_page8_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_065_page8_conf0.87.png"}, {"equation_num": 66, "page": 8, "confidence": 0.87, "filename": "equation_066_page8_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_066_page8_conf0.87.png"}, {"equation_num": 67, "page": 9, "confidence": 0.95, "filename": "equation_067_page9_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_067_page9_conf0.95.png"}, {"equation_num": 68, "page": 9, "confidence": 0.95, "filename": "equation_068_page9_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_068_page9_conf0.95.png"}, {"equation_num": 69, "page": 9, "confidence": 0.94, "filename": "equation_069_page9_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_069_page9_conf0.94.png"}, {"equation_num": 70, "page": 9, "confidence": 0.94, "filename": "equation_070_page9_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_070_page9_conf0.94.png"}, {"equation_num": 71, "page": 9, "confidence": 0.93, "filename": "equation_071_page9_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_071_page9_conf0.93.png"}, {"equation_num": 72, "page": 9, "confidence": 0.93, "filename": "equation_072_page9_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_072_page9_conf0.93.png"}, {"equation_num": 73, "page": 9, "confidence": 0.93, "filename": "equation_073_page9_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_073_page9_conf0.93.png"}, {"equation_num": 74, "page": 9, "confidence": 0.9, "filename": "equation_074_page9_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_074_page9_conf0.90.png"}, {"equation_num": 75, "page": 9, "confidence": 0.9, "filename": "equation_075_page9_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_075_page9_conf0.90.png"}, {"equation_num": 76, "page": 9, "confidence": 0.89, "filename": "equation_076_page9_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_076_page9_conf0.89.png"}, {"equation_num": 77, "page": 9, "confidence": 0.89, "filename": "equation_077_page9_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_077_page9_conf0.89.png"}, {"equation_num": 78, "page": 9, "confidence": 0.88, "filename": "equation_078_page9_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_078_page9_conf0.88.png"}, {"equation_num": 79, "page": 9, "confidence": 0.88, "filename": "equation_079_page9_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_079_page9_conf0.88.png"}, {"equation_num": 80, "page": 9, "confidence": 0.88, "filename": "equation_080_page9_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_080_page9_conf0.88.png"}, {"equation_num": 81, "page": 9, "confidence": 0.87, "filename": "equation_081_page9_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_081_page9_conf0.87.png"}, {"equation_num": 82, "page": 9, "confidence": 0.84, "filename": "equation_082_page9_conf0.84.png", "filepath": "results/doclayout_yolo_test/equation_082_page9_conf0.84.png"}, {"equation_num": 83, "page": 10, "confidence": 0.95, "filename": "equation_083_page10_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_083_page10_conf0.95.png"}, {"equation_num": 84, "page": 10, "confidence": 0.93, "filename": "equation_084_page10_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_084_page10_conf0.93.png"}, {"equation_num": 85, "page": 10, "confidence": 0.89, "filename": "equation_085_page10_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_085_page10_conf0.89.png"}, {"equation_num": 86, "page": 10, "confidence": 0.87, "filename": "equation_086_page10_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_086_page10_conf0.87.png"}, {"equation_num": 87, "page": 13, "confidence": 0.91, "filename": "equation_087_page13_conf0.91.png", "filepath": "results/doclayout_yolo_test/equation_087_page13_conf0.91.png"}, {"equation_num": 88, "page": 13, "confidence": 0.86, "filename": "equation_088_page13_conf0.86.png", "filepath": "results/doclayout_yolo_test/equation_088_page13_conf0.86.png"}, {"equation_num": 89, "page": 15, "confidence": 0.95, "filename": "equation_089_page15_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_089_page15_conf0.95.png"}, {"equation_num": 90, "page": 15, "confidence": 0.93, "filename": "equation_090_page15_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_090_page15_conf0.93.png"}, {"equation_num": 91, "page": 15, "confidence": 0.92, "filename": "equation_091_page15_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_091_page15_conf0.92.png"}, {"equation_num": 92, "page": 15, "confidence": 0.88, "filename": "equation_092_page15_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_092_page15_conf0.88.png"}, {"equation_num": 93, "page": 15, "confidence": 0.88, "filename": "equation_093_page15_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_093_page15_conf0.88.png"}, {"equation_num": 94, "page": 15, "confidence": 0.87, "filename": "equation_094_page15_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_094_page15_conf0.87.png"}, {"equation_num": 95, "page": 16, "confidence": 0.96, "filename": "equation_095_page16_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_095_page16_conf0.96.png"}, {"equation_num": 96, "page": 16, "confidence": 0.96, "filename": "equation_096_page16_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_096_page16_conf0.96.png"}, {"equation_num": 97, "page": 16, "confidence": 0.95, "filename": "equation_097_page16_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_097_page16_conf0.95.png"}, {"equation_num": 98, "page": 16, "confidence": 0.95, "filename": "equation_098_page16_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_098_page16_conf0.95.png"}, {"equation_num": 99, "page": 16, "confidence": 0.95, "filename": "equation_099_page16_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_099_page16_conf0.95.png"}, {"equation_num": 100, "page": 16, "confidence": 0.94, "filename": "equation_100_page16_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_100_page16_conf0.94.png"}, {"equation_num": 101, "page": 16, "confidence": 0.92, "filename": "equation_101_page16_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_101_page16_conf0.92.png"}, {"equation_num": 102, "page": 16, "confidence": 0.89, "filename": "equation_102_page16_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_102_page16_conf0.89.png"}, {"equation_num": 103, "page": 16, "confidence": 0.89, "filename": "equation_103_page16_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_103_page16_conf0.89.png"}, {"equation_num": 104, "page": 16, "confidence": 0.89, "filename": "equation_104_page16_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_104_page16_conf0.89.png"}, {"equation_num": 105, "page": 16, "confidence": 0.89, "filename": "equation_105_page16_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_105_page16_conf0.89.png"}, {"equation_num": 106, "page": 16, "confidence": 0.88, "filename": "equation_106_page16_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_106_page16_conf0.88.png"}, {"equation_num": 107, "page": 16, "confidence": 0.88, "filename": "equation_107_page16_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_107_page16_conf0.88.png"}, {"equation_num": 108, "page": 16, "confidence": 0.88, "filename": "equation_108_page16_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_108_page16_conf0.88.png"}, {"equation_num": 109, "page": 16, "confidence": 0.88, "filename": "equation_109_page16_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_109_page16_conf0.88.png"}, {"equation_num": 110, "page": 16, "confidence": 0.61, "filename": "equation_110_page16_conf0.61.png", "filepath": "results/doclayout_yolo_test/equation_110_page16_conf0.61.png"}, {"equation_num": 111, "page": 16, "confidence": 0.5, "filename": "equation_111_page16_conf0.50.png", "filepath": "results/doclayout_yolo_test/equation_111_page16_conf0.50.png"}, {"equation_num": 112, "page": 16, "confidence": 0.27, "filename": "equation_112_page16_conf0.27.png", "filepath": "results/doclayout_yolo_test/equation_112_page16_conf0.27.png"}, {"equation_num": 113, "page": 17, "confidence": 0.95, "filename": "equation_113_page17_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_113_page17_conf0.95.png"}, {"equation_num": 114, "page": 17, "confidence": 0.95, "filename": "equation_114_page17_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_114_page17_conf0.95.png"}, {"equation_num": 115, "page": 17, "confidence": 0.95, "filename": "equation_115_page17_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_115_page17_conf0.95.png"}, {"equation_num": 116, "page": 17, "confidence": 0.95, "filename": "equation_116_page17_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_116_page17_conf0.95.png"}, {"equation_num": 117, "page": 17, "confidence": 0.93, "filename": "equation_117_page17_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_117_page17_conf0.93.png"}, {"equation_num": 118, "page": 17, "confidence": 0.92, "filename": "equation_118_page17_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_118_page17_conf0.92.png"}, {"equation_num": 119, "page": 17, "confidence": 0.92, "filename": "equation_119_page17_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_119_page17_conf0.92.png"}, {"equation_num": 120, "page": 17, "confidence": 0.9, "filename": "equation_120_page17_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_120_page17_conf0.90.png"}, {"equation_num": 121, "page": 17, "confidence": 0.89, "filename": "equation_121_page17_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_121_page17_conf0.89.png"}, {"equation_num": 122, "page": 17, "confidence": 0.89, "filename": "equation_122_page17_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_122_page17_conf0.89.png"}, {"equation_num": 123, "page": 17, "confidence": 0.89, "filename": "equation_123_page17_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_123_page17_conf0.89.png"}, {"equation_num": 124, "page": 17, "confidence": 0.89, "filename": "equation_124_page17_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_124_page17_conf0.89.png"}, {"equation_num": 125, "page": 17, "confidence": 0.88, "filename": "equation_125_page17_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_125_page17_conf0.88.png"}, {"equation_num": 126, "page": 17, "confidence": 0.87, "filename": "equation_126_page17_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_126_page17_conf0.87.png"}, {"equation_num": 127, "page": 18, "confidence": 0.96, "filename": "equation_127_page18_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_127_page18_conf0.96.png"}, {"equation_num": 128, "page": 18, "confidence": 0.9, "filename": "equation_128_page18_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_128_page18_conf0.90.png"}, {"equation_num": 129, "page": 18, "confidence": 0.89, "filename": "equation_129_page18_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_129_page18_conf0.89.png"}, {"equation_num": 130, "page": 18, "confidence": 0.88, "filename": "equation_130_page18_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_130_page18_conf0.88.png"}, {"equation_num": 131, "page": 20, "confidence": 0.96, "filename": "equation_131_page20_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_131_page20_conf0.96.png"}, {"equation_num": 132, "page": 20, "confidence": 0.95, "filename": "equation_132_page20_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_132_page20_conf0.95.png"}, {"equation_num": 133, "page": 20, "confidence": 0.95, "filename": "equation_133_page20_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_133_page20_conf0.95.png"}, {"equation_num": 134, "page": 20, "confidence": 0.94, "filename": "equation_134_page20_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_134_page20_conf0.94.png"}, {"equation_num": 135, "page": 20, "confidence": 0.93, "filename": "equation_135_page20_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_135_page20_conf0.93.png"}, {"equation_num": 136, "page": 20, "confidence": 0.93, "filename": "equation_136_page20_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_136_page20_conf0.93.png"}, {"equation_num": 137, "page": 20, "confidence": 0.92, "filename": "equation_137_page20_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_137_page20_conf0.92.png"}, {"equation_num": 138, "page": 20, "confidence": 0.9, "filename": "equation_138_page20_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_138_page20_conf0.90.png"}, {"equation_num": 139, "page": 20, "confidence": 0.89, "filename": "equation_139_page20_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_139_page20_conf0.89.png"}, {"equation_num": 140, "page": 20, "confidence": 0.88, "filename": "equation_140_page20_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_140_page20_conf0.88.png"}, {"equation_num": 141, "page": 20, "confidence": 0.88, "filename": "equation_141_page20_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_141_page20_conf0.88.png"}, {"equation_num": 142, "page": 20, "confidence": 0.88, "filename": "equation_142_page20_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_142_page20_conf0.88.png"}, {"equation_num": 143, "page": 20, "confidence": 0.88, "filename": "equation_143_page20_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_143_page20_conf0.88.png"}, {"equation_num": 144, "page": 20, "confidence": 0.88, "filename": "equation_144_page20_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_144_page20_conf0.88.png"}, {"equation_num": 145, "page": 21, "confidence": 0.94, "filename": "equation_145_page21_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_145_page21_conf0.94.png"}, {"equation_num": 146, "page": 21, "confidence": 0.89, "filename": "equation_146_page21_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_146_page21_conf0.89.png"}, {"equation_num": 147, "page": 22, "confidence": 0.95, "filename": "equation_147_page22_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_147_page22_conf0.95.png"}, {"equation_num": 148, "page": 22, "confidence": 0.95, "filename": "equation_148_page22_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_148_page22_conf0.95.png"}, {"equation_num": 149, "page": 22, "confidence": 0.94, "filename": "equation_149_page22_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_149_page22_conf0.94.png"}, {"equation_num": 150, "page": 22, "confidence": 0.94, "filename": "equation_150_page22_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_150_page22_conf0.94.png"}, {"equation_num": 151, "page": 22, "confidence": 0.94, "filename": "equation_151_page22_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_151_page22_conf0.94.png"}, {"equation_num": 152, "page": 22, "confidence": 0.88, "filename": "equation_152_page22_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_152_page22_conf0.88.png"}, {"equation_num": 153, "page": 22, "confidence": 0.88, "filename": "equation_153_page22_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_153_page22_conf0.88.png"}, {"equation_num": 154, "page": 22, "confidence": 0.87, "filename": "equation_154_page22_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_154_page22_conf0.87.png"}, {"equation_num": 155, "page": 22, "confidence": 0.87, "filename": "equation_155_page22_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_155_page22_conf0.87.png"}, {"equation_num": 156, "page": 22, "confidence": 0.87, "filename": "equation_156_page22_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_156_page22_conf0.87.png"}, {"equation_num": 157, "page": 23, "confidence": 0.95, "filename": "equation_157_page23_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_157_page23_conf0.95.png"}, {"equation_num": 158, "page": 23, "confidence": 0.92, "filename": "equation_158_page23_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_158_page23_conf0.92.png"}, {"equation_num": 159, "page": 23, "confidence": 0.88, "filename": "equation_159_page23_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_159_page23_conf0.88.png"}, {"equation_num": 160, "page": 23, "confidence": 0.84, "filename": "equation_160_page23_conf0.84.png", "filepath": "results/doclayout_yolo_test/equation_160_page23_conf0.84.png"}, {"equation_num": 161, "page": 24, "confidence": 0.95, "filename": "equation_161_page24_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_161_page24_conf0.95.png"}, {"equation_num": 162, "page": 24, "confidence": 0.85, "filename": "equation_162_page24_conf0.85.png", "filepath": "results/doclayout_yolo_test/equation_162_page24_conf0.85.png"}, {"equation_num": 163, "page": 30, "confidence": 0.97, "filename": "equation_163_page30_conf0.97.png", "filepath": "results/doclayout_yolo_test/equation_163_page30_conf0.97.png"}, {"equation_num": 164, "page": 30, "confidence": 0.96, "filename": "equation_164_page30_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_164_page30_conf0.96.png"}, {"equation_num": 165, "page": 30, "confidence": 0.96, "filename": "equation_165_page30_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_165_page30_conf0.96.png"}, {"equation_num": 166, "page": 30, "confidence": 0.94, "filename": "equation_166_page30_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_166_page30_conf0.94.png"}, {"equation_num": 167, "page": 30, "confidence": 0.94, "filename": "equation_167_page30_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_167_page30_conf0.94.png"}, {"equation_num": 168, "page": 30, "confidence": 0.9, "filename": "equation_168_page30_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_168_page30_conf0.90.png"}, {"equation_num": 169, "page": 30, "confidence": 0.88, "filename": "equation_169_page30_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_169_page30_conf0.88.png"}, {"equation_num": 170, "page": 30, "confidence": 0.86, "filename": "equation_170_page30_conf0.86.png", "filepath": "results/doclayout_yolo_test/equation_170_page30_conf0.86.png"}, {"equation_num": 171, "page": 30, "confidence": 0.86, "filename": "equation_171_page30_conf0.86.png", "filepath": "results/doclayout_yolo_test/equation_171_page30_conf0.86.png"}, {"equation_num": 172, "page": 30, "confidence": 0.82, "filename": "equation_172_page30_conf0.82.png", "filepath": "results/doclayout_yolo_test/equation_172_page30_conf0.82.png"}, {"equation_num": 173, "page": 31, "confidence": 0.96, "filename": "equation_173_page31_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_173_page31_conf0.96.png"}, {"equation_num": 174, "page": 31, "confidence": 0.96, "filename": "equation_174_page31_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_174_page31_conf0.96.png"}, {"equation_num": 175, "page": 31, "confidence": 0.94, "filename": "equation_175_page31_conf0.94.png", "filepath": "results/doclayout_yolo_test/equation_175_page31_conf0.94.png"}, {"equation_num": 176, "page": 31, "confidence": 0.93, "filename": "equation_176_page31_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_176_page31_conf0.93.png"}, {"equation_num": 177, "page": 31, "confidence": 0.92, "filename": "equation_177_page31_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_177_page31_conf0.92.png"}, {"equation_num": 178, "page": 31, "confidence": 0.92, "filename": "equation_178_page31_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_178_page31_conf0.92.png"}, {"equation_num": 179, "page": 31, "confidence": 0.91, "filename": "equation_179_page31_conf0.91.png", "filepath": "results/doclayout_yolo_test/equation_179_page31_conf0.91.png"}, {"equation_num": 180, "page": 31, "confidence": 0.9, "filename": "equation_180_page31_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_180_page31_conf0.90.png"}, {"equation_num": 181, "page": 31, "confidence": 0.9, "filename": "equation_181_page31_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_181_page31_conf0.90.png"}, {"equation_num": 182, "page": 31, "confidence": 0.9, "filename": "equation_182_page31_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_182_page31_conf0.90.png"}, {"equation_num": 183, "page": 31, "confidence": 0.9, "filename": "equation_183_page31_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_183_page31_conf0.90.png"}, {"equation_num": 184, "page": 31, "confidence": 0.89, "filename": "equation_184_page31_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_184_page31_conf0.89.png"}, {"equation_num": 185, "page": 31, "confidence": 0.89, "filename": "equation_185_page31_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_185_page31_conf0.89.png"}, {"equation_num": 186, "page": 31, "confidence": 0.89, "filename": "equation_186_page31_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_186_page31_conf0.89.png"}, {"equation_num": 187, "page": 31, "confidence": 0.89, "filename": "equation_187_page31_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_187_page31_conf0.89.png"}, {"equation_num": 188, "page": 31, "confidence": 0.88, "filename": "equation_188_page31_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_188_page31_conf0.88.png"}, {"equation_num": 189, "page": 31, "confidence": 0.88, "filename": "equation_189_page31_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_189_page31_conf0.88.png"}, {"equation_num": 190, "page": 31, "confidence": 0.87, "filename": "equation_190_page31_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_190_page31_conf0.87.png"}, {"equation_num": 191, "page": 32, "confidence": 0.96, "filename": "equation_191_page32_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_191_page32_conf0.96.png"}, {"equation_num": 192, "page": 32, "confidence": 0.96, "filename": "equation_192_page32_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_192_page32_conf0.96.png"}, {"equation_num": 193, "page": 32, "confidence": 0.96, "filename": "equation_193_page32_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_193_page32_conf0.96.png"}, {"equation_num": 194, "page": 32, "confidence": 0.96, "filename": "equation_194_page32_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_194_page32_conf0.96.png"}, {"equation_num": 195, "page": 32, "confidence": 0.96, "filename": "equation_195_page32_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_195_page32_conf0.96.png"}, {"equation_num": 196, "page": 32, "confidence": 0.95, "filename": "equation_196_page32_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_196_page32_conf0.95.png"}, {"equation_num": 197, "page": 32, "confidence": 0.93, "filename": "equation_197_page32_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_197_page32_conf0.93.png"}, {"equation_num": 198, "page": 32, "confidence": 0.93, "filename": "equation_198_page32_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_198_page32_conf0.93.png"}, {"equation_num": 199, "page": 32, "confidence": 0.92, "filename": "equation_199_page32_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_199_page32_conf0.92.png"}, {"equation_num": 200, "page": 32, "confidence": 0.92, "filename": "equation_200_page32_conf0.92.png", "filepath": "results/doclayout_yolo_test/equation_200_page32_conf0.92.png"}, {"equation_num": 201, "page": 32, "confidence": 0.91, "filename": "equation_201_page32_conf0.91.png", "filepath": "results/doclayout_yolo_test/equation_201_page32_conf0.91.png"}, {"equation_num": 202, "page": 32, "confidence": 0.9, "filename": "equation_202_page32_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_202_page32_conf0.90.png"}, {"equation_num": 203, "page": 32, "confidence": 0.9, "filename": "equation_203_page32_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_203_page32_conf0.90.png"}, {"equation_num": 204, "page": 32, "confidence": 0.89, "filename": "equation_204_page32_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_204_page32_conf0.89.png"}, {"equation_num": 205, "page": 32, "confidence": 0.89, "filename": "equation_205_page32_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_205_page32_conf0.89.png"}, {"equation_num": 206, "page": 32, "confidence": 0.89, "filename": "equation_206_page32_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_206_page32_conf0.89.png"}, {"equation_num": 207, "page": 32, "confidence": 0.89, "filename": "equation_207_page32_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_207_page32_conf0.89.png"}, {"equation_num": 208, "page": 32, "confidence": 0.88, "filename": "equation_208_page32_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_208_page32_conf0.88.png"}, {"equation_num": 209, "page": 32, "confidence": 0.88, "filename": "equation_209_page32_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_209_page32_conf0.88.png"}, {"equation_num": 210, "page": 32, "confidence": 0.88, "filename": "equation_210_page32_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_210_page32_conf0.88.png"}, {"equation_num": 211, "page": 32, "confidence": 0.88, "filename": "equation_211_page32_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_211_page32_conf0.88.png"}, {"equation_num": 212, "page": 32, "confidence": 0.88, "filename": "equation_212_page32_conf0.88.png", "filepath": "results/doclayout_yolo_test/equation_212_page32_conf0.88.png"}, {"equation_num": 213, "page": 32, "confidence": 0.87, "filename": "equation_213_page32_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_213_page32_conf0.87.png"}, {"equation_num": 214, "page": 32, "confidence": 0.87, "filename": "equation_214_page32_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_214_page32_conf0.87.png"}, {"equation_num": 215, "page": 32, "confidence": 0.87, "filename": "equation_215_page32_conf0.87.png", "filepath": "results/doclayout_yolo_test/equation_215_page32_conf0.87.png"}, {"equation_num": 216, "page": 32, "confidence": 0.83, "filename": "equation_216_page32_conf0.83.png", "filepath": "results/doclayout_yolo_test/equation_216_page32_conf0.83.png"}, {"equation_num": 217, "page": 33, "confidence": 0.96, "filename": "equation_217_page33_conf0.96.png", "filepath": "results/doclayout_yolo_test/equation_217_page33_conf0.96.png"}, {"equation_num": 218, "page": 33, "confidence": 0.95, "filename": "equation_218_page33_conf0.95.png", "filepath": "results/doclayout_yolo_test/equation_218_page33_conf0.95.png"}, {"equation_num": 219, "page": 33, "confidence": 0.93, "filename": "equation_219_page33_conf0.93.png", "filepath": "results/doclayout_yolo_test/equation_219_page33_conf0.93.png"}, {"equation_num": 220, "page": 33, "confidence": 0.9, "filename": "equation_220_page33_conf0.90.png", "filepath": "results/doclayout_yolo_test/equation_220_page33_conf0.90.png"}, {"equation_num": 221, "page": 33, "confidence": 0.89, "filename": "equation_221_page33_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_221_page33_conf0.89.png"}, {"equation_num": 222, "page": 33, "confidence": 0.89, "filename": "equation_222_page33_conf0.89.png", "filepath": "results/doclayout_yolo_test/equation_222_page33_conf0.89.png"}];
+
+        let currentSort = 'equation';
+        let currentPageFilter = 'all';
+        let currentThreshold = 0.0;
+
+        function getConfidenceClass(conf) {
+            if (conf >= 0.95) return 'conf-excellent';
+            if (conf >= 0.90) return 'conf-good';
+            return 'conf-fair';
+        }
+
+        function renderEquations() {
+            const grid = document.getElementById('equationsGrid');
+            grid.innerHTML = '';
+
+            let filtered = [...equations];
+
+            // Filter by confidence threshold
+            filtered = filtered.filter(eq => eq.confidence >= currentThreshold);
+
+            // Filter by page
+            if (currentPageFilter !== 'all') {
+                filtered = filtered.filter(eq => eq.page === parseInt(currentPageFilter));
+            }
+
+            // Sort
+            if (currentSort === 'equation') {
+                filtered.sort((a, b) => a.equation_num - b.equation_num);
+            } else if (currentSort === 'page') {
+                filtered.sort((a, b) => a.page - b.page || a.equation_num - b.equation_num);
+            } else if (currentSort === 'confidence') {
+                filtered.sort((a, b) => b.confidence - a.confidence);
+            } else if (currentSort === 'confidence-asc') {
+                filtered.sort((a, b) => a.confidence - b.confidence);
+            }
+
+            // Update filtered count
+            document.getElementById('filteredCount').textContent = `${filtered.length} equations`;
+
+            // Render cards
+            filtered.forEach(eq => {
+                const card = document.createElement('div');
+                card.className = 'equation-card';
+                card.innerHTML = `
+                    <img src="${eq.filepath}" class="equation-image" alt="Equation ${eq.equation_num}"
+                         onclick="openModal('${eq.filepath}')">
+                    <div class="equation-info">
+                        <div class="equation-meta">
+                            <span class="equation-num">Eq ${eq.equation_num}</span>
+                            <span class="page-num">Page ${eq.page}</span>
+                        </div>
+                        <div class="confidence ${getConfidenceClass(eq.confidence)}">
+                            Confidence: ${(eq.confidence * 100).toFixed(1)}%
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openModal(imagePath) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imagePath;
+        }
+
+        // Event listeners
+        document.getElementById('confThreshold').addEventListener('input', function() {
+            currentThreshold = parseFloat(this.value);
+            document.getElementById('thresholdValue').textContent = currentThreshold.toFixed(2);
+            renderEquations();
+        });
+
+        document.getElementById('sortBy').addEventListener('change', function() {
+            currentSort = this.value;
+            renderEquations();
+        });
+
+        document.getElementById('filterPage').addEventListener('change', function() {
+            currentPageFilter = this.value;
+            renderEquations();
+        });
+
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('imageModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Initial render
+        renderEquations();
+    </script>
+</body>
+</html>

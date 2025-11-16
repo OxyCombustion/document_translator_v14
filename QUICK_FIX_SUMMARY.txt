@@ -1,0 +1,197 @@
+================================================================================
+QUICK FIX SUMMARY - DOCLING V13 TO V14 MIGRATION
+================================================================================
+
+PROBLEM:
+  File: /home/thermodynamics/document_translator_v14/detection_v14_P14/src/docling/docling_figure_detector.py
+  Line 117: 'ExportedCCSDocument' object has no attribute 'pages'
+
+ROOT CAUSE:
+  Line 101-102 tries to access result.output instead of result.document
+  result.output doesn't have the .pages attribute that V13's result.document had
+
+================================================================================
+THE V13 WORKING PATTERN (PROVEN)
+================================================================================
+
+Location: /home/thermodynamics/document_translator_v13/agents/detection/docling_figure_detector.py
+
+Step 1 - Line 96:
+    result = self.converter.convert(str(pdf_path))
+
+Step 2 - Lines 101-102:
+    if hasattr(result, 'document'):
+        doc = result.document
+
+Step 3 - Line 117 (works because doc has .pages):
+    for page_num, page in enumerate(doc.pages, 1):
+        ...
+
+Key Pattern:
+    result.document  ← Access the document THIS WAY in V13
+    └── doc.pages ← Then access pages from doc
+    └── doc.pictures ← For figure detection
+    └── doc.tables ← For tables
+    └── doc.texts ← For text
+
+================================================================================
+THE V14 BROKEN CODE
+================================================================================
+
+Location: /home/thermodynamics/document_translator_v14/detection_v14_P14/src/docling/docling_figure_detector.py
+
+Line 96:
+    result = self.converter.convert_single(pdf_path)  ← Different API!
+
+Lines 101-102:
+    if hasattr(result, 'output'):      ← Tries to use result.output
+        doc = result.output            ← Wrong attribute!
+
+Line 117:
+    for page_num, page in enumerate(doc.pages, 1):  ← FAILS: doc.pages doesn't exist
+
+Error: 'ExportedCCSDocument' object has no attribute 'pages'
+    This means: result.output ≠ result.document
+    result.output doesn't have the same structure
+
+================================================================================
+THE FIX (Two Options)
+================================================================================
+
+OPTION 1 - Quick Compatibility Check (RECOMMENDED):
+──────────────────────────────────────────────────
+
+Replace lines 101-102 with:
+
+    # COMPATIBILITY FIX: Handle both v13 and v14 result structures
+    if hasattr(result, 'document'):
+        doc = result.document
+    elif hasattr(result, 'output'):
+        doc = result.output
+    else:
+        print(f"ERROR: Unknown Docling result structure")
+        return []
+
+Then the rest of the code works unchanged because doc.pages will exist!
+
+
+OPTION 2 - Understand V14 API First:
+────────────────────────────────────
+
+Add debugging after line 96:
+
+    result = self.converter.convert(str(pdf_path))
+    
+    # DEBUG: Show what we got
+    print(f"Result type: {type(result)}")
+    print(f"Result attributes: {[a for a in dir(result) if not a.startswith('_')]}")
+    
+    if hasattr(result, 'document'):
+        print(f"document attributes: {[a for a in dir(result.document) if not a.startswith('_')]}")
+    elif hasattr(result, 'output'):
+        print(f"output attributes: {[a for a in dir(result.output) if not a.startswith('_')]}")
+
+This shows what V14 actually returned, then update code accordingly.
+
+================================================================================
+COMPLETE V13 METHOD (Copy This)
+================================================================================
+
+def detect_figures(self, pdf_path: Path, docling_result=None) -> List[Zone]:
+    """Detect figure regions using Docling's document model."""
+    print(f"\nDOCLING FIGURE DETECTION")
+    
+    start_time = datetime.now()
+
+    # Use provided result or run conversion
+    if docling_result:
+        result = docling_result
+    else:
+        result = self.converter.convert(str(pdf_path))
+
+    zones = []
+
+    # KEY FIX: Access result.document, not result.output
+    if hasattr(result, 'document'):
+        doc = result.document
+
+        # Method 1: Check for pictures collection
+        if hasattr(doc, 'pictures') and doc.pictures:
+            for i, picture in enumerate(doc.pictures):
+                zone = self._picture_to_zone(picture, i)
+                if zone:
+                    zones.append(zone)
+
+        # Method 2: Scan page elements for picture items
+        else:
+            picture_count = 0
+            for page_num, page in enumerate(doc.pages, 1):  # KEY: doc.pages works
+                if hasattr(page, 'children'):
+                    for item in page.children:
+                        item_type = type(item).__name__
+                        if 'Picture' in item_type or 'Figure' in item_type:
+                            zone = self._element_to_zone(item, page_num, picture_count)
+                            if zone:
+                                zones.append(zone)
+                                picture_count += 1
+
+    duration = (datetime.now() - start_time).total_seconds()
+    print(f"Figures detected: {len(zones)} in {duration:.1f}s")
+    
+    return zones
+
+================================================================================
+HOW V13 OTHER DETECTORS USE THE SAME PATTERN
+================================================================================
+
+All three detectors use result.document successfully:
+
+DoclingTableDetector (line 91):
+    if hasattr(result, 'document') and hasattr(result.document, 'tables'):
+        for i, table in enumerate(result.document.tables):  ← result.document.tables
+
+DoclingTextDetector (line 97):
+    doc = docling_result.document
+    for idx, text_item in enumerate(doc.texts):  ← doc.texts
+
+DoclingFigureDetector (lines 101-102, 117):
+    if hasattr(result, 'document'):
+        doc = result.document
+        for page_num, page in enumerate(doc.pages, 1):  ← doc.pages
+
+Pattern: result.document.COLLECTION
+         .pages
+         .pictures  
+         .tables
+         .texts
+
+================================================================================
+FILES TO REFERENCE
+================================================================================
+
+V13 Working Code:
+  /home/thermodynamics/document_translator_v13/agents/detection/docling_figure_detector.py
+  (Lines 101-102 and 117 show the working pattern)
+
+V14 Broken Code:
+  /home/thermodynamics/document_translator_v14/detection_v14_P14/src/docling/docling_figure_detector.py
+  (Lines 101-102 and 117 show the broken pattern)
+
+Complete Documentation:
+  /home/thermodynamics/document_translator_v14/V13_DOCLING_FIGURE_EXTRACTION_FINDINGS.md
+  /home/thermodynamics/document_translator_v14/V14_DOCLING_API_FIX_GUIDE.md
+
+================================================================================
+SUMMARY
+================================================================================
+
+V13: result.document.pages ✅ WORKS
+V14: result.output doesn't have .pages ❌ BROKEN
+
+FIX: Use compatibility check to support both APIs ✅
+     if hasattr(result, 'document'): doc = result.document
+     elif hasattr(result, 'output'): doc = result.output
+
+Then the rest of V13's proven code works unchanged!
+
+================================================================================

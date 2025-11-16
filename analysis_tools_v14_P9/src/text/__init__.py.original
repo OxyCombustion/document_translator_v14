@@ -1,0 +1,7 @@
+"""
+Text Extractor Agent Module
+"""
+
+from .basic_agent import BasicTextExtractorAgent
+
+__all__ = ['BasicTextExtractorAgent']

@@ -1,0 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Detection Module - Unified object detection agents.
+
+This module contains agents for detecting document objects (equations, tables, figures, text)
+using various methods (DocLayout-YOLO, Docling, etc.).
+"""
+
+from .unified_detection_module import UnifiedDetectionModule
+from .docling_table_detector import DoclingTableDetector
+
+__all__ = [
+    'UnifiedDetectionModule',
+    'DoclingTableDetector',
+]

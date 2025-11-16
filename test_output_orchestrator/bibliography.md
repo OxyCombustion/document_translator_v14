@@ -1,0 +1,43 @@
+# Bibliography - Chapter 4 Heat Transfer
+
+**Extracted**: 2025-11-15T21:31:40.714945  
+**Total References**: 18
+
+---
+
+**[1]** Roshenow, W.M., Hartnett, J.P., and Ganic, E.N., Handbook of Heat Transfer Fundamentals, Second ed., McGraw-Hill, Inc., New York, New York, 1985.
+
+**[2]** Roshenow, W.M., Hartnett, J.P., and Ganic, E.N., Handbook of Heat Transfer Applications, Second ed., McGraw-Hill, Inc., New York, New York, 1985.
+
+**[3]** Kreith, F., and Bohn, M.S., Principles of Heat Transfer, Fourth ed., Harper and Row, New York, New York, 1986.
+
+**[4]** Hottel, H.C., and Sarofim, A.F., Radiative Transfer, McGraw-Hill, Inc., New York, New York, 1967.
+
+**[5]** Wall, T.F., Bhattacharya, S.P., Zhang, D.K., et al., “The Properties and Thermal Effects of Ash Deposits in Coal Fired Furnaces,” Progress in Energy and Combustion Science, Vol. 19, pp. 487-504, 1993.
+
+**[6]** Meyer, C.A., et al., ASME Steam Tables: Thermo­ dynamic and Transport Properties of Steam, Sixth ed., American Society of Mechanical Engineers, New York, New York, 1993.
+
+**[7]**  Boow, J., and Goard, P.R.C., “Fireside Deposits and Their Effect on Heat Transfer in a Pulverized Fuel-Fired Boiler: Part III. The Influence of the Physical Characteris­ tics of the Deposit on its Radiative Emittance and Effective Thermal Conductance,” Journal of the Institute of Fuel, pp. 412-419, Vol. 42, No. 346, 1969.
+
+**[8]** Leckner, B., “Spectral and Total Emissivity of Water Vapor and Carbon Dioxide,” Combustion and Flame, Vol. 19, pp. 33-48, 1972.
+
+**[9]** Edwards, D.K., “Molecular Gas Band Radiation,” Advances in Heat Transfer, Vol. 12, Academic Press, New York, New York, pp. 115-193, 1964.
+
+**[10]** Modest, M.F., Radiative Heat Transfer, McGraw Hill, Inc., New York, New York, 1993.
+
+**[11]** Sieder, E.N., and Tate, G.E., “Heat Transfer and Pres­ sure Drop of Liquids in Tubes,” Industrial & Engineering and Chemistry Research (I&EC), Vol. 28, p. 1429, 1936.
+
+**[12]** Dittus, F.W., and Boelter, L.M.K., University of California Publications on Engineering, Vol. 2, p. 443, Berkeley, California, 1930.
+
+**[13]** McAdams, W., Heat Transmission, Third ed., McGraw- Hill, Inc., New York, New York, 1954.
+
+**[14]** Grimison, E.D., “Correlation and Utilization of New Data on Flow Resistance and Heat Transfer for Cross Flow of Gases over Tube Banks,” Transactions of the American Society of Mechanical Engineers, Vol. 59, pp. 583-594, 1937.
+
+**[15]** Schmidt, T.F., “Wärme leistung von berippten Flächen,” Mitt. des Kältetechn. Institut der T.H. Karlshruhn, Vol. 4, 1949.
+
+**[16]** Incropera, F., and DeWitt, D.P., Fundamentals of Heat and Mass Transfer, Third ed., John Wiley & Sons, New York, New York, 1990.
+
+**[17]** Patankar, S., Numerical Heat Transfer and Fluid Flow, McGraw-Hill, Inc., New York, New York, 1980.
+
+**[18]** Fiveland, W.A., “Discrete-Ordinates Solutions of the Radiative Transport Equation for Rectangular Enclosures,” Transactions of the American Society of Mechanical Engi­ neers Journal of  Heat Transfer, Vol. 106, pp. 699-706, 1984. Pyrex is a trademark of Corning Incorporated.
+

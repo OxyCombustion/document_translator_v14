@@ -1,0 +1,114 @@
+# Document Translator V14 - Production Requirements
+# Generated: 2025-11-15
+# Python Version: >=3.11
+
+# ============================================================================
+# CORE PDF & DOCUMENT PROCESSING
+# ============================================================================
+
+# PyMuPDF - Fast PDF parsing and rendering
+PyMuPDF>=1.23.0,<2.0.0
+
+# Docling - Advanced document processing and layout analysis
+docling>=1.0.0,<2.0.0
+
+# DocLayout-YOLO - Document layout detection
+doclayout-yolo>=0.0.4,<1.0.0
+
+# ============================================================================
+# COMPUTER VISION & OCR
+# ============================================================================
+
+# OpenCV - Computer vision and image processing
+opencv-python>=4.8.0,<5.0.0
+
+# EasyOCR - Optical character recognition
+easyocr>=1.7.0,<2.0.0
+
+# Pillow - Python Imaging Library
+Pillow>=10.0.0,<11.0.0
+
+# ============================================================================
+# MACHINE LEARNING & AI
+# ============================================================================
+
+# PyTorch - Deep learning framework
+torch>=2.0.0,<3.0.0
+
+# Transformers - Hugging Face transformer models
+transformers>=4.35.0,<5.0.0
+
+# NumPy - Numerical computing
+numpy>=1.24.0,<2.0.0
+
+# ============================================================================
+# DATA PROCESSING & MANIPULATION
+# ============================================================================
+
+# Pandas - Data analysis and manipulation
+pandas>=2.0.0,<3.0.0
+
+# OpenPyXL - Excel file reading/writing
+openpyxl>=3.1.0,<4.0.0
+
+# NetworkX - Graph and network analysis
+networkx>=3.0,<4.0.0
+
+# ============================================================================
+# VECTOR DATABASE & EMBEDDINGS
+# ============================================================================
+
+# ChromaDB - Vector database for RAG
+chromadb>=0.4.0,<1.0.0
+
+# ============================================================================
+# EXTERNAL API CLIENTS
+# ============================================================================
+
+# CrossRef API client
+crossref-commons>=0.0.7
+
+# Note: OpenAlex and Unpaywall clients may be custom implementations
+# If using external packages, add them here:
+# openalex-api>=0.1.0
+# unpaywall>=0.1.0
+
+# ============================================================================
+# CONFIGURATION & UTILITIES
+# ============================================================================
+
+# PyYAML - YAML configuration file parsing
+PyYAML>=6.0,<7.0.0
+
+# tqdm - Progress bars
+tqdm>=4.65.0,<5.0.0
+
+# psutil - System and process utilities
+psutil>=5.9.0,<6.0.0
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# Standard library imports (no installation needed):
+# - argparse, asyncio, base64, concurrent.futures, dataclasses
+# - datetime, difflib, enum, functools, gc, glob, hashlib
+# - io, json, logging, math, multiprocessing, os, pathlib
+# - platform, queue, random, re, shutil, signal, sqlite3
+# - statistics, subprocess, sys, tarfile, tempfile, threading
+# - time, typing, unicodedata, urllib, warnings
+
+# Custom/internal modules (part of this project):
+# - chromadb_setup, core.*, database.*, src.*
+# - All *_v14_P* packages are internal
+
+# GPU Support (optional):
+# For CUDA GPU support, install PyTorch with CUDA:
+# torch>=2.0.0+cu118 (for CUDA 11.8)
+# torch>=2.0.0+cu121 (for CUDA 12.1)
+# See: https://pytorch.org/get-started/locally/
+
+# Intel GPU Support (optional):
+# For Intel GPU support, install:
+# intel-extension-for-pytorch>=2.0.0
+# See: https://intel.github.io/intel-extension-for-pytorch/
