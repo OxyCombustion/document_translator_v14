@@ -42,7 +42,7 @@ from typing import List
 from datetime import datetime
 
 # Import Zone from base agent (proper relative import)
-from ..base_extraction_agent import Zone
+from common.src.base.base_extraction_agent import Zone
 
 
 class DoclingTableDetector:
@@ -83,13 +83,20 @@ class DoclingTableDetector:
             result = docling_result
         else:
             print("Running Docling conversion...")
-            result = self.converter.convert(str(pdf_path))
+            result = self.converter.convert_single(pdf_path)
 
         # Extract table zones
         zones = []
 
+        # Use result.document (v13 API) or result.output (newer API) - both have .tables
+        tables_source = None
         if hasattr(result, 'document') and hasattr(result.document, 'tables'):
-            for i, table in enumerate(result.document.tables):
+            tables_source = result.document.tables
+        elif hasattr(result, 'output') and hasattr(result.output, 'tables'):
+            tables_source = result.output.tables
+
+        if tables_source:
+            for i, table in enumerate(tables_source):
                 # Get table location
                 page_num = 1  # Default
                 bbox = [0, 0, 100, 100]  # Default
@@ -100,13 +107,13 @@ class DoclingTableDetector:
                         if hasattr(prov, 'page_no'):
                             page_num = prov.page_no
                         if hasattr(prov, 'bbox'):
-                            bbox_obj = prov.bbox
-                            bbox = [
-                                bbox_obj.l,
-                                bbox_obj.t,
-                                bbox_obj.r,
-                                bbox_obj.b
-                            ]
+                            bbox_data = prov.bbox
+                            # New Docling API: bbox is a list [l, t, r, b]
+                            if isinstance(bbox_data, list) and len(bbox_data) == 4:
+                                bbox = bbox_data
+                            # Old API fallback: bbox is an object with .l, .t, .r, .b
+                            elif hasattr(bbox_data, 'l'):
+                                bbox = [bbox_data.l, bbox_data.t, bbox_data.r, bbox_data.b]
 
                 # Create zone
                 zone_id = f"table_{i+1}"
@@ -118,7 +125,7 @@ class DoclingTableDetector:
                     metadata={
                         'docling_table_index': i,
                         'detection_method': 'docling',
-                        'markdown': table.export_to_markdown()  # Add markdown for extraction
+                        'html': table.export_to_html()  # Add HTML for extraction (new Docling API)
                     }
                 )
                 zones.append(zone)

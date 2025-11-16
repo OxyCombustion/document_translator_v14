@@ -51,9 +51,9 @@ if sys.platform == 'win32':
         except (AttributeError, ValueError):
             pass
 
-# Import existing caption extractors
-from caption_extraction.table_caption_extractor import TableCaptionExtractor
-from base_extraction_agent import Zone
+# Import existing caption extractors (v14 package imports)
+from specialized_extraction_v14_P15.src.captions.table_caption_extractor import TableCaptionExtractor
+from common.src.base.base_extraction_agent import Zone
 
 
 class ObjectNumberingCoordinator:

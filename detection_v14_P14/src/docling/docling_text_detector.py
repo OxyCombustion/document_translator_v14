@@ -42,7 +42,7 @@ from pathlib import Path
 from typing import List, Optional
 from dataclasses import dataclass
 
-from base_extraction_agent import Zone
+from common.src.base.base_extraction_agent import Zone
 
 from docling.document_converter import DocumentConverter
 
@@ -88,11 +88,18 @@ class DoclingTextDetector:
         # Use existing result or convert
         if docling_result is None:
             print("Converting document with Docling...")
-            docling_result = self.converter.convert(str(pdf_path))
+            docling_result = self.converter.convert_single(pdf_path)
         else:
             print("Using existing Docling result (shared conversion)...")
 
-        doc = docling_result.document
+        # Use result.document (v13 API, has .texts, .pages) instead of result.output
+        if hasattr(docling_result, 'document'):
+            doc = docling_result.document
+        elif hasattr(docling_result, 'output'):
+            doc = docling_result.output
+        else:
+            print("⚠️  Docling result has neither 'document' nor 'output' attribute")
+            return []
 
         # Extract text blocks
         print(f"Extracting text blocks...")

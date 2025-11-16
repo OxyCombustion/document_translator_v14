@@ -42,7 +42,7 @@ from typing import List
 from datetime import datetime
 
 # Import Zone from base agent (proper relative import)
-from ..base_extraction_agent import Zone
+from common.src.base.base_extraction_agent import Zone
 
 
 class DoclingFigureDetector:
@@ -93,38 +93,43 @@ class DoclingFigureDetector:
             result = docling_result
         else:
             print("Running Docling conversion...")
-            result = self.converter.convert(str(pdf_path))
+            result = self.converter.convert_single(pdf_path)
 
         # Extract figure zones from Docling's document model
         zones = []
 
+        # Use result.document (v13 API, has .pages) instead of result.output
         if hasattr(result, 'document'):
             doc = result.document
+        elif hasattr(result, 'output'):
+            doc = result.output
 
-            # Method 1: Check for pictures collection
-            if hasattr(doc, 'pictures') and doc.pictures:
-                print(f"Found {len(doc.pictures)} pictures in document.pictures")
-                for i, picture in enumerate(doc.pictures):
-                    zone = self._picture_to_zone(picture, i)
-                    if zone:
-                        zones.append(zone)
-                        print(f"  Picture {i+1}: page {zone.page}, bbox {zone.bbox}")
+        # Method 1: Check for pictures collection
+        if hasattr(doc, 'pictures') and doc.pictures:
+            print(f"Found {len(doc.pictures)} pictures in document.pictures")
+            for i, picture in enumerate(doc.pictures):
+                zone = self._picture_to_zone(picture, i)
+                if zone:
+                    zones.append(zone)
+                    print(f"  Picture {i+1}: page {zone.page}, bbox {zone.bbox}")
 
-            # Method 2: Scan page elements for picture items
-            else:
-                print("Scanning page elements for pictures...")
-                picture_count = 0
-                for page_num, page in enumerate(doc.pages, 1):
-                    if hasattr(page, 'children'):
-                        for item in page.children:
-                            # Check if this is a picture element
-                            item_type = type(item).__name__
-                            if 'Picture' in item_type or 'Figure' in item_type or 'Image' in item_type:
-                                zone = self._element_to_zone(item, page_num, picture_count)
-                                if zone:
-                                    zones.append(zone)
-                                    print(f"  Picture {picture_count+1}: page {page_num}, bbox {zone.bbox}")
-                                    picture_count += 1
+        # Method 2: Scan page elements for picture items
+        elif hasattr(doc, 'pages'):
+            print("Scanning page elements for pictures...")
+            picture_count = 0
+            for page_num, page in enumerate(doc.pages, 1):
+                if hasattr(page, 'children'):
+                    for item in page.children:
+                        # Check if this is a picture element
+                        item_type = type(item).__name__
+                        if 'Picture' in item_type or 'Figure' in item_type or 'Image' in item_type:
+                            zone = self._element_to_zone(item, page_num, picture_count)
+                            if zone:
+                                zones.append(zone)
+                                print(f"  Picture {picture_count+1}: page {page_num}, bbox {zone.bbox}")
+                                picture_count += 1
+        else:
+            print("⚠️  No .pictures or .pages found on document object")
 
         duration = (datetime.now() - start_time).total_seconds()
 

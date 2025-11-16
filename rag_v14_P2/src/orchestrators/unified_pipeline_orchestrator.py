@@ -61,7 +61,7 @@ from analysis_validation_v14_P19.src.validation.document_reference_inventory_age
 from specialized_extraction_v14_P15.src.coordination.object_numbering_coordinator import ObjectNumberingCoordinator
 from analysis_validation_v14_P19.src.validation.completeness_validation_agent import CompletenessValidationAgent
 from metadata_v14_P13.src.bibliography.bibliography_extraction_agent import BibliographyExtractionAgent
-from curation_v14_P3.src.export.table_export_agent import TableExportAgent
+from extraction_v14_P1.src.agents.table.table_export_agent import TableExportAgent
 
 
 class UnifiedPipelineOrchestrator:
@@ -204,7 +204,7 @@ class UnifiedPipelineOrchestrator:
 
         # First: Run Docling once (for tables, figures, AND text)
         print("Running Docling conversion (tables + figures + text)...")
-        docling_result = docling_table_detector.converter.convert(str(pdf_path))
+        docling_result = docling_table_detector.converter.convert_single(pdf_path)
 
         # Extract tables, figures, and text from same Docling result (sequential, can't pickle)
         print("Extracting Docling zones (tables + figures + text)...")
