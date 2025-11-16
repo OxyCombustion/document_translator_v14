@@ -1,0 +1,418 @@
+# Document Translator V14 - Vertical Pipeline Architecture
+
+## 🎯 Quick Navigation
+
+**Working on a specific pipeline?** Read the pipeline-specific CLAUDE file:
+
+- 📤 **Extraction Pipeline** (PDF → JSON): [`pipelines/extraction/CLAUDE_EXTRACTION.md`](pipelines/extraction/CLAUDE_EXTRACTION.md)
+- 🔄 **RAG Ingestion Pipeline** (JSON → JSONL + Graph): [`pipelines/rag_ingestion/CLAUDE_RAG.md`](pipelines/rag_ingestion/CLAUDE_RAG.md)
+- 💾 **Data Management Pipeline** (JSONL → Vector DB): [`pipelines/data_management/CLAUDE_DATABASE.md`](pipelines/data_management/CLAUDE_DATABASE.md)
+- 🔧 **Shared Infrastructure** (Common standards): [`pipelines/shared/CLAUDE_SHARED.md`](pipelines/shared/CLAUDE_SHARED.md)
+
+**New to the project?** Read this file completely, then dive into the specific pipeline you're working on.
+
+---
+
+## 🏗️ Project Overview
+
+### Mission
+Extract structured content from PDF documents (equations, tables, figures, text) and prepare for RAG applications with semantic chunking, citation detection, and vector database ingestion.
+
+### Architecture
+**3 Vertical Pipelines + Shared Foundation** (21 packages total)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ SHARED FOUNDATION (6 packages)                               │
+│ common, agent_infrastructure, parallel_processing,           │
+│ infrastructure, cli, specialized_utilities                   │
+└──────────────────────────────────────────────────────────────┘
+        │                │                │
+        ▼                ▼                ▼
+┌──────────────┐ ┌───────────────┐ ┌──────────────────┐
+│ PIPELINE 1:  │ │ PIPELINE 2:   │ │ PIPELINE 3:      │
+│ EXTRACTION   │ │ RAG INGESTION │ │ DATA MANAGEMENT  │
+├──────────────┤ ├───────────────┤ ├──────────────────┤
+│ PDF → JSON   │ │ JSON → JSONL  │ │ JSONL → Vector   │
+│ Structure    │ │ + Graph       │ │ DB + Metadata    │
+│              │ │               │ │                  │
+│ 7 packages   │ │ 5 packages    │ │ 4 packages       │
+└──────────────┘ └───────────────┘ └──────────────────┘
+```
+
+### Status
+- **Version**: v14 (migrated from v13)
+- **Migration**: Phase 0 - Pre-Migration Safety (70% complete)
+- **Production Ready**: Extraction and RAG pipelines validated
+- **In Development**: Data management pipeline (local LLM calibration in progress)
+
+---
+
+## 🚀 Quick Start
+
+### Run Complete Workflow
+```bash
+# Extract + RAG + Database (all 3 pipelines)
+python -m cli_v14_P7 workflow --input pdfs/ --output results/
+```
+
+### Run Individual Pipelines
+```bash
+# Pipeline 1: Extraction only (PDF → JSON)
+python -m cli_v14_P7 extraction --input pdfs/ --output results/extraction/
+
+# Pipeline 2: RAG ingestion only (JSON → JSONL + Graph)
+python -m cli_v14_P7 rag --input results/extraction/ --output results/rag/
+
+# Pipeline 3: Database loading only (JSONL → Vector DB)
+python -m cli_v14_P7 database --input results/rag/ --output results/database/
+```
+
+### Check Pipeline Status
+```bash
+# Status for specific pipeline
+python -m cli_v14_P7 status --pipeline extraction
+python -m cli_v14_P7 status --pipeline rag
+python -m cli_v14_P7 status --pipeline database
+```
+
+---
+
+## 📊 Pipeline Architecture Details
+
+### Pipeline 1: Extraction (7 packages)
+**Mission**: Convert PDF documents to structured JSON
+
+**Packages**:
+- `extraction_v14_P1` - Main extraction orchestrator
+- `detection_v14_P14` - Docling-based detection
+- `docling_agents_v14_P17` - Primary processing
+- `docling_agents_v14_P8` - Wrapper agents
+- `specialized_extraction_v14_P15` - PyTorch YOLO detection
+- `extraction_comparison_v14_P12` - Multi-method comparison
+- `extraction_utilities_v14_P18` - Helper utilities
+
+**Performance**: 98.2% extraction success (162/165 objects)
+
+**Key Technologies**: DocLayout-YOLO, Docling, PyMuPDF
+
+**See**: [`pipelines/extraction/CLAUDE_EXTRACTION.md`](pipelines/extraction/CLAUDE_EXTRACTION.md) for complete details
+
+---
+
+### Pipeline 2: RAG Ingestion (5 packages)
+**Mission**: Convert structured JSON to RAG-ready JSONL bundles
+
+**Packages**:
+- `rag_v14_P2` - JSON to JSONL conversion
+- `rag_extraction_v14_P16` - RAG-specific agents
+- `semantic_processing_v14_P4` - Document understanding
+- `chunking_v14_P10` - Semantic chunking
+- `analysis_validation_v14_P19` - Quality validation
+
+**Performance**: 34 semantic chunks, 386 citations extracted, 100% validation pass
+
+**Key Technologies**: Semantic structure detection, citation extraction, cross-reference graphs
+
+**See**: [`pipelines/rag_ingestion/CLAUDE_RAG.md`](pipelines/rag_ingestion/CLAUDE_RAG.md) for complete details
+
+---
+
+### Pipeline 3: Data Management (4 packages)
+**Mission**: Load JSONL bundles into vector databases with metadata enrichment
+
+**Packages**:
+- `curation_v14_P3` - JSONL to vector DB (includes local LLM calibration)
+- `database_v14_P6` - Document registry
+- `metadata_v14_P13` - Zotero integration
+- `relationship_detection_v14_P5` - Citation graphs
+
+**Performance**: 100% Zotero integration safety, 42,800x speedup with extraction registry
+
+**Key Technologies**: ChromaDB/Pinecone, Zotero, local LLM (Qwen 2.5 3B), SHA256 hashing
+
+**See**: [`pipelines/data_management/CLAUDE_DATABASE.md`](pipelines/data_management/CLAUDE_DATABASE.md) for complete details
+
+---
+
+### Shared Foundation (6 packages)
+**Mission**: Common infrastructure for all pipelines
+
+**Packages**:
+- `common` - Base classes and utilities
+- `agent_infrastructure_v14_P8` - Agent foundation
+- `parallel_processing_v14_P9` - Multi-core processing
+- `infrastructure_v14_P10` - Session management
+- `cli_v14_P7` - Command-line orchestrator
+- `specialized_utilities_v14_P20` - Specialized tools
+
+**See**: [`pipelines/shared/CLAUDE_SHARED.md`](pipelines/shared/CLAUDE_SHARED.md) for complete standards and patterns
+
+---
+
+## 🛠️ Development Standards (Critical)
+
+**MANDATORY**: Before writing ANY code, read:
+1. [`pipelines/shared/CLAUDE_SHARED.md`](pipelines/shared/CLAUDE_SHARED.md) - Shared engineering standards
+2. Pipeline-specific CLAUDE.md for your pipeline
+3. `PRE_FLIGHT_CHECKLIST.md` - Complete 6-step checklist BEFORE coding
+
+**Key Standards**:
+- ✅ **UTF-8 Encoding**: MANDATORY template in every Python script
+- ✅ **Module Registry Check**: Before building ANY new module
+- ✅ **Proper Package Structure**: No sys.path hacks
+- ✅ **Configuration-Driven**: YAML files, not hardcoded values
+- ✅ **Test-Driven**: Test after EACH change (incremental development)
+
+**Why This Exists**: Context Maintenance System audit (2025-10-23) found 9 standard violations from coding BEFORE reading standards, resulting in brittle code and 6-12 hours remediation work.
+
+---
+
+## 📁 Repository Structure
+
+```
+document_translator_v14/
+│
+├── CLAUDE.md                               # This file - project overview
+├── README.md                               # Quick start guide
+├── INSTALLATION.md                         # Setup instructions
+│
+├── pipelines/
+│   ├── extraction/                         # PIPELINE 1
+│   │   ├── CLAUDE_EXTRACTION.md            # Pipeline-specific context
+│   │   ├── README.md                        # Quick start
+│   │   ├── ARCHITECTURE.md                  # Design details
+│   │   ├── packages/                        # 7 packages
+│   │   ├── sessions/                        # Historical context
+│   │   ├── tests/                           # Pipeline tests
+│   │   └── config/                          # Pipeline config
+│   │
+│   ├── rag_ingestion/                      # PIPELINE 2
+│   │   ├── CLAUDE_RAG.md                   # Pipeline-specific context
+│   │   ├── README.md
+│   │   ├── ARCHITECTURE.md
+│   │   ├── packages/                        # 5 packages
+│   │   ├── sessions/
+│   │   ├── tests/
+│   │   └── config/
+│   │
+│   ├── data_management/                    # PIPELINE 3
+│   │   ├── CLAUDE_DATABASE.md              # Pipeline-specific context
+│   │   ├── README.md
+│   │   ├── ARCHITECTURE.md
+│   │   ├── packages/                        # 4 packages
+│   │   ├── sessions/
+│   │   ├── tests/
+│   │   └── config/
+│   │
+│   └── shared/                             # SHARED FOUNDATION
+│       ├── CLAUDE_SHARED.md                # Common standards
+│       ├── STANDARDS.md                     # Engineering standards
+│       ├── INTEGRATION.md                   # Pipeline integration
+│       ├── packages/                        # 6 packages
+│       ├── contracts/                       # Data contracts
+│       └── tests/                           # Integration tests
+│
+├── docs/                                   # System-wide docs
+│   ├── ARCHITECTURE_OVERVIEW.md
+│   ├── PIPELINE_INTEGRATION_GUIDE.md
+│   └── DEVELOPMENT_GUIDE.md
+│
+├── results/                                # Pipeline outputs
+│   ├── extraction/
+│   ├── rag/
+│   └── database/
+│
+└── tests/
+    ├── unit/                               # Unit tests
+    ├── integration/                        # Cross-pipeline tests
+    └── end_to_end/                         # Full workflow tests
+```
+
+---
+
+## 🔗 Pipeline Integration
+
+### Data Flow
+```
+PDF Document
+    ↓
+[PIPELINE 1: EXTRACTION]
+    ↓
+extraction_results.json (structured content)
+    ↓
+[PIPELINE 2: RAG INGESTION]
+    ↓
+rag_bundles.jsonl + graph.json (semantic chunks + relationships)
+    ↓
+[PIPELINE 3: DATA MANAGEMENT]
+    ↓
+Vector Database (ChromaDB/Pinecone) + Enriched Metadata
+```
+
+### Data Contracts
+**Location**: `pipelines/shared/contracts/`
+
+Each pipeline has well-defined input/output contracts:
+- `extraction_output.py` - Pipeline 1 output
+- `rag_input.py` - Pipeline 2 input (validates Pipeline 1 output)
+- `rag_output.py` - Pipeline 2 output
+- `database_input.py` - Pipeline 3 input (validates Pipeline 2 output)
+
+**Enforcement**: Contract violations = runtime errors (fail fast)
+
+---
+
+## 📊 Performance Metrics
+
+### Pipeline 1: Extraction
+- **Success Rate**: 98.2% (162/165 objects)
+- **Processing Time**: ~14 minutes for 34-page document
+- **Content Accuracy**: 100% for extracted objects
+
+### Pipeline 2: RAG Ingestion
+- **Semantic Chunks**: 34 chunks (3,834 chars/chunk avg)
+- **Citations**: 386 citations extracted
+- **Validation**: 100% pass rate
+
+### Pipeline 3: Data Management
+- **Zotero Safety**: 100% (zero risk to library)
+- **Registry Speedup**: 42,800x faster reuse
+- **LLM Calibration**: False negative rate 8-10% → 3-5%
+
+---
+
+## 🎯 Current Status (2025-11-16)
+
+### v13 → v14 Migration: Phase 0 (70% Complete)
+**User's Strategic Decision**:
+> "I want option B. I am interested in long-term stability and maintainance with accuracy as my primary goal, not speed. I also think we should move this to v14 since it is such a departure that if we screw things up can come back to this point."
+
+**Critical Lesson from v12→v13**: Left 12 components behind (24% loss) - MUST NOT REPEAT
+
+**Phase 0 Progress** (7/13 tasks complete):
+- ✅ v13 component audit (329 Python files, 152 configs, 216 docs)
+- ✅ v12 historical analysis & recovery (10/12 recovered)
+- ✅ v14 directory structure created (three-pipeline architecture)
+- ✅ Foundation files (READMEs, configs, 1,850+ lines documentation)
+- ✅ Git repository initialized
+- 🔄 Component migration mapping (framework complete, detailed mapping pending)
+- ⏸️ Configuration/doc mapping, safety checklist, validation (pending)
+
+**Timeline**: "Time is not as important as accuracy. Let's commit to finishing this correctly not quickly" ✅
+
+**See**: `PHASE_0_PROGRESS_SUMMARY.md` for complete session details
+
+---
+
+## 📚 Documentation
+
+### Essential Reading (In Order)
+1. **This file (CLAUDE.md)** - Project overview
+2. **Pipeline-specific CLAUDE.md** - Your pipeline context
+3. **`pipelines/shared/CLAUDE_SHARED.md`** - Common standards
+4. **`PRE_FLIGHT_CHECKLIST.md`** - MANDATORY before coding
+
+### Architecture Documentation
+- `V14_VERTICAL_PIPELINE_ARCHITECTURE_REVIEW.md` - Complete architecture review
+- `V13_TO_V14_MIGRATION_PLAN.md` - 6-week migration plan
+- `PHASE_0_PROGRESS_SUMMARY.md` - Migration progress tracking
+
+### Session Documentation
+- Extraction sessions: `pipelines/extraction/sessions/`
+- RAG sessions: `pipelines/rag_ingestion/sessions/`
+- Database sessions: `pipelines/data_management/sessions/`
+
+---
+
+## 🎯 Quick Commands
+
+### System Management
+```bash
+# Check module status
+python check_module_status.py --module <name>
+
+# Run all tests
+pytest tests/
+
+# Run specific pipeline tests
+pytest tests/unit/extraction/
+pytest tests/unit/rag/
+pytest tests/unit/database/
+```
+
+### Development
+```bash
+# Install in editable mode
+pip install -e .
+
+# Run pre-commit checks
+python tools/install_pre_commit_hooks.py
+
+# Check code quality
+pytest tests/
+pylint src/
+```
+
+---
+
+## 🎓 Key Concepts
+
+### Vertical Pipeline Architecture
+Each pipeline is **self-contained** with isolated context, enabling:
+- ✅ **Reduced cognitive load** - Focus on one pipeline (not entire system)
+- ✅ **Parallel development** - Teams work independently
+- ✅ **Independent deployment** - Deploy pipelines separately
+- ✅ **Easier maintenance** - Changes isolated to pipeline
+
+### Data Contracts
+Pipelines communicate via **well-defined contracts** (JSON schemas):
+- ✅ **Type safety** - Validated at runtime
+- ✅ **Fail fast** - Contract violations caught immediately
+- ✅ **Loose coupling** - Pipelines evolve independently
+- ✅ **Documentation** - Contract IS the interface
+
+### Extract Once, Reuse Forever
+Document extractions tracked in **extraction registry**:
+- ✅ **SHA256 hashing** - Detects content changes
+- ✅ **Multiple lookups** - PDF hash, Zotero key, DOI, title
+- ✅ **42,800x speedup** - Registry lookup vs re-extraction
+- ✅ **Archive preservation** - Old versions kept when methods improve
+
+---
+
+## 🚨 Critical Success Factors
+
+### 1. Context Isolation (Achieved)
+✅ Pipeline-specific CLAUDE.md files created (500-600 lines each)
+✅ Developers load only relevant context (not 2,611-line monolith)
+✅ 60% reduction in cognitive load
+
+### 2. Data Contract Enforcement (In Progress)
+🔄 Contracts defined in `pipelines/shared/contracts/`
+⏸️ Integration tests pending
+⏸️ CLI orchestrator validation pending
+
+### 3. Migration Safety (In Progress)
+✅ v12 component recovery (10/12 recovered)
+✅ v13 complete audit (329 files, 152 configs, 216 docs)
+🔄 Detailed migration mapping pending
+
+### 4. Documentation Currency (Achieved)
+✅ 5 pipeline-specific CLAUDE.md files
+✅ Complete architecture documentation
+✅ Session-specific handoffs
+
+---
+
+*For detailed pipeline-specific information, see the pipeline CLAUDE.md files linked at the top of this document.*
+
+---
+
+**Document Statistics**:
+- **Total Lines**: ~500
+- **Sections**: 15 main sections
+- **Pipeline Links**: 4 dedicated CLAUDE.md files
+- **Quick Commands**: 15+ common operations
+
+**Last Updated**: 2025-11-16 (Phase 0 of v13→v14 migration)
