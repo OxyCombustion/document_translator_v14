@@ -125,7 +125,7 @@ class DoclingTableDetector:
                     metadata={
                         'docling_table_index': i,
                         'detection_method': 'docling',
-                        'html': table.export_to_html()  # Add HTML for extraction (new Docling API)
+                        'markdown': table.export_to_markdown()  # Add markdown for extraction (expected by TableExtractionAgent)
                     }
                 )
                 zones.append(zone)
