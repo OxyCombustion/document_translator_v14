@@ -276,6 +276,9 @@ class DocLayoutEquationDetector:
         import re
         from collections import defaultdict
 
+        # Regex pattern for equation numbers: (1), (2), (3a), etc.
+        number_pattern = r'^\((\d+[a-z]?)\)$'
+
         # Group zones by page
         by_page = defaultdict(list)
         for zone in zones:
@@ -294,13 +297,14 @@ class DocLayoutEquationDetector:
                 if i in used:
                     continue
 
-                # Check if this zone is just an equation number
-                rect1 = fitz.Rect(zone1.bbox)
-                text1 = page.get_text("text", clip=rect1).strip()
+                # Check if this zone is just an equation number (use YOLO class)
+                yolo_class1 = zone1.metadata.get('yolo_class', '')
+                is_number1 = ('caption' in yolo_class1.lower())  # formula_caption = number
 
-                # Pattern for standalone equation numbers: "(1)", "(2a)", etc.
-                number_pattern = r'^\((\d+[a-z]?)\)$'
-                is_number1 = bool(re.match(number_pattern, text1))
+                rect1 = fitz.Rect(zone1.bbox)
+
+                # Extract text if this is a caption (for equation number extraction later)
+                text1 = page.get_text("text", clip=rect1).strip() if is_number1 else ""
 
                 # Calculate area
                 area1 = (rect1.x1 - rect1.x0) * (rect1.y1 - rect1.y0)
@@ -313,9 +317,15 @@ class DocLayoutEquationDetector:
                     if i == j or j in used:
                         continue
 
+                    # Check if zone2 is an equation number (use YOLO class)
+                    yolo_class2 = zone2.metadata.get('yolo_class', '')
+                    is_number2 = ('caption' in yolo_class2.lower())
+
                     rect2 = fitz.Rect(zone2.bbox)
-                    text2 = page.get_text("text", clip=rect2).strip()
-                    is_number2 = bool(re.match(number_pattern, text2))
+
+                    # Extract text if this is a caption (for equation number extraction later)
+                    text2 = page.get_text("text", clip=rect2).strip() if is_number2 else ""
+
                     area2 = (rect2.x1 - rect2.x0) * (rect2.y1 - rect2.y0)
 
                     # Only merge if one is a number and one is not
@@ -330,8 +340,8 @@ class DocLayoutEquationDetector:
 
                     distance = ((center1_x - center2_x)**2 + (center1_y - center2_y)**2)**0.5
 
-                    # Consider zones nearby if distance < 100 points (typical equation number spacing)
-                    if distance < 100 and distance < best_distance:
+                    # Consider zones nearby if distance < 130 points (typical equation number spacing)
+                    if distance < 130 and distance < best_distance:
                         best_distance = distance
                         best_match = (j, zone2, text2, area2, is_number2)
 
