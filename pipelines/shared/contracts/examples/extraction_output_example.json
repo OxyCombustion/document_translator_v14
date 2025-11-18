@@ -1,0 +1,106 @@
+{
+  "document_id": "chapter4_heat_transfer",
+  "extraction_timestamp": "2025-11-18T10:30:45.123456Z",
+  "objects": [
+    {
+      "object_id": "eq_1",
+      "object_type": "equation",
+      "bbox": {
+        "page": 4,
+        "x0": 125.5,
+        "y0": 450.0,
+        "x1": 475.8,
+        "y1": 485.2
+      },
+      "file_path": "equations/eq_1.png",
+      "confidence": 0.98,
+      "metadata": {
+        "latex_available": true,
+        "equation_number": "4.1"
+      }
+    },
+    {
+      "object_id": "eq_2",
+      "object_type": "equation",
+      "bbox": {
+        "page": 5,
+        "x0": 125.5,
+        "y0": 320.0,
+        "x1": 475.8,
+        "y1": 355.2
+      },
+      "file_path": "equations/eq_2.png",
+      "confidence": 0.95,
+      "metadata": {
+        "latex_available": true,
+        "equation_number": "4.2"
+      }
+    },
+    {
+      "object_id": "tbl_1",
+      "object_type": "table",
+      "bbox": {
+        "page": 7,
+        "x0": 100.0,
+        "y0": 200.0,
+        "x1": 500.0,
+        "y1": 450.0
+      },
+      "file_path": "tables/tbl_1.csv",
+      "confidence": 0.92,
+      "metadata": {
+        "table_number": "4.1",
+        "caption": "Thermal conductivity values"
+      }
+    },
+    {
+      "object_id": "fig_1",
+      "object_type": "figure",
+      "bbox": {
+        "page": 10,
+        "x0": 150.0,
+        "y0": 250.0,
+        "x1": 450.0,
+        "y1": 550.0
+      },
+      "file_path": "figures/fig_1.png",
+      "confidence": 0.89,
+      "metadata": {
+        "figure_number": "4.1",
+        "caption": "Heat transfer mechanisms"
+      }
+    },
+    {
+      "object_id": "txt_1",
+      "object_type": "text",
+      "bbox": {
+        "page": 1,
+        "x0": 100.0,
+        "y0": 100.0,
+        "x1": 500.0,
+        "y1": 700.0
+      },
+      "file_path": "text/txt_1.txt",
+      "confidence": 0.99,
+      "metadata": {
+        "section": "Introduction",
+        "paragraph_count": 5
+      }
+    }
+  ],
+  "metadata": {
+    "source_filename": "Ch-04_Heat_Transfer.pdf",
+    "page_count": 34,
+    "extraction_quality": {
+      "overall_score": 0.93,
+      "equations_extracted": 108,
+      "tables_extracted": 13,
+      "figures_extracted": 47,
+      "text_blocks_extracted": 250
+    },
+    "file_hash": "sha256:abc123def456789...",
+    "doi": "10.1234/example.thermodynamics.2025",
+    "title": "Chapter 4: Heat Transfer Fundamentals",
+    "pipeline_version": "14.0.0"
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "document_id": "chapter4_heat_transfer",
+  "bundles": [
+    {
+      "bundle_id": "bundle:eq1_complete",
+      "bundle_type": "equation",
+      "entity_id": "eq:1",
+      "content": {
+        "latex": "q_c = -kA \\frac{dT}{dx}",
+        "description": "Fourier's law of heat conduction",
+        "equation_number": "4.1",
+        "page": 4
+      },
+      "usage_guidance": {
+        "when_to_use": "Calculate conductive heat transfer rate when temperature gradient is known",
+        "variables": {
+          "q_c": "Conductive heat transfer rate (W)",
+          "k": "Thermal conductivity (W/m·K)",
+          "A": "Cross-sectional area (m²)",
+          "dT/dx": "Temperature gradient (K/m)"
+        },
+        "typical_values": {
+          "k_copper": 401.0,
+          "k_steel": 50.0,
+          "k_concrete": 1.0
+        },
+        "assumptions": [
+          "Steady-state conduction",
+          "One-dimensional heat flow",
+          "Constant thermal conductivity"
+        ]
+      },
+      "semantic_tags": [
+        "heat transfer",
+        "conduction",
+        "Fourier's law",
+        "temperature gradient",
+        "thermal conductivity"
+      ],
+      "embedding_metadata": {
+        "source_page": 4,
+        "section": "4.1 Conduction",
+        "chapter": "Chapter 4: Heat Transfer",
+        "importance": "fundamental"
+      },
+      "relationships": [
+        {
+          "target_id": "tbl:1",
+          "relationship_type": "uses_data_from",
+          "description": "Uses thermal conductivity values from Table 4.1"
+        },
+        {
+          "target_id": "eq:2",
+          "relationship_type": "derived_from",
+          "description": "Derived from energy conservation principle"
+        }
+      ]
+    },
+    {
+      "bundle_id": "bundle:tbl1_complete",
+      "bundle_type": "table",
+      "entity_id": "tbl:1",
+      "content": {
+        "table_number": "4.1",
+        "caption": "Thermal conductivity values for common materials",
+        "markdown": "| Material | k (W/m·K) | Temperature (°C) |\n|----------|-----------|------------------|\n| Copper | 401 | 20 |\n| Steel | 50 | 20 |\n| Concrete | 1.0 | 20 |",
+        "page": 7,
+        "data_summary": "Lists thermal conductivity values for 15 common materials at standard temperature"
+      },
+      "usage_guidance": {
+        "when_to_use": "Look up thermal conductivity values for heat transfer calculations",
+        "materials_included": [
+          "Metals (Cu, Al, Fe, Steel)",
+          "Building materials (Concrete, Brick, Wood)",
+          "Insulation (Fiberglass, Foam, Air)"
+        ],
+        "notes": "Values given at 20°C; temperature dependence not included"
+      },
+      "semantic_tags": [
+        "thermal conductivity",
+        "material properties",
+        "heat transfer data",
+        "reference table"
+      ],
+      "embedding_metadata": {
+        "source_page": 7,
+        "section": "4.1 Conduction",
+        "table_type": "reference_data"
+      },
+      "relationships": [
+        {
+          "target_id": "eq:1",
+          "relationship_type": "provides_data_for",
+          "description": "Provides k values for Fourier's law calculations"
+        },
+        {
+          "target_id": "eq:5",
+          "relationship_type": "provides_data_for",
+          "description": "Used in thermal resistance calculations"
+        }
+      ]
+    },
+    {
+      "bundle_id": "bundle:concept_thermal_conductivity",
+      "bundle_type": "concept",
+      "entity_id": "concept:thermal_conductivity",
+      "content": {
+        "concept_name": "Thermal Conductivity",
+        "symbol": "k",
+        "definition": "A material property that indicates the ability to conduct heat. Higher values mean better heat conduction.",
+        "units": "W/(m·K) or W/(m·°C)",
+        "physical_meaning": "Heat transfer rate per unit area per unit temperature gradient",
+        "typical_range": {
+          "metals": "50-400 W/(m·K)",
+          "ceramics": "1-50 W/(m·K)",
+          "polymers": "0.1-0.5 W/(m·K)",
+          "insulators": "0.02-0.1 W/(m·K)"
+        }
+      },
+      "usage_guidance": {
+        "when_to_use": "Understanding material heat transfer behavior",
+        "related_concepts": [
+          "Thermal diffusivity (α)",
+          "Thermal resistance (R)",
+          "Heat transfer coefficient (h)"
+        ],
+        "common_applications": [
+          "Heat sink design",
+          "Insulation selection",
+          "Thermal stress analysis"
+        ]
+      },
+      "semantic_tags": [
+        "thermal conductivity",
+        "material property",
+        "heat transfer",
+        "fundamental concept"
+      ],
+      "embedding_metadata": {
+        "concept_type": "material_property",
+        "importance": "fundamental",
+        "prerequisite_concepts": ["heat transfer", "temperature gradient"]
+      },
+      "relationships": [
+        {
+          "target_id": "eq:1",
+          "relationship_type": "appears_in",
+          "description": "Parameter in Fourier's law"
+        },
+        {
+          "target_id": "tbl:1",
+          "relationship_type": "tabulated_in",
+          "description": "Values listed for various materials"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "source_document_id": "chapter4_heat_transfer",
+    "processing_timestamp": "2025-11-18T11:15:32.789012Z",
+    "pipeline_version": "14.0.0",
+    "total_bundles": 3,
+    "bundles_by_type": {
+      "equation": 1,
+      "table": 1,
+      "concept": 1
+    },
+    "total_relationships": 7,
+    "semantic_chunks_created": 34,
+    "citations_extracted": 386,
+    "average_bundle_tokens": 425.3,
+    "quality_metrics": {
+      "bundle_completeness": 0.95,
+      "relationship_density": 2.33,
+      "semantic_tag_coverage": 0.89
+    }
+  },
+  "knowledge_graph": {
+    "nodes": 120,
+    "edges": 286,
+    "graph_type": "directed",
+    "relationship_types": [
+      "uses_data_from",
+      "derived_from",
+      "provides_data_for",
+      "appears_in",
+      "cites",
+      "references"
+    ]
+  }
+}
