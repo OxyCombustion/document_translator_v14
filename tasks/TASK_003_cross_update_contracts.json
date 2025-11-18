@@ -1,0 +1,64 @@
+{
+  "task_id": "TASK_003",
+  "title": "Update Data Contracts for Annotations Feature",
+  "assigned_to": "orchestrator",
+  "delegated_by": "orchestrator",
+  "created_at": "2025-11-17T20:10:00Z",
+  "status": "pending",
+  "priority": "high",
+
+  "specification": {
+    "description": "Update pipeline data contracts to formally include annotations field. This ensures extraction → RAG handoff validates annotation data correctly.",
+    "affected_packages": [
+      "pipelines/shared/contracts/extraction_output.py",
+      "pipelines/shared/contracts/rag_input.py"
+    ],
+    "affected_pipelines": [
+      "extraction",
+      "rag",
+      "shared"
+    ],
+    "deliverables": [
+      "Update extraction_output.py to include annotations schema",
+      "Update rag_input.py to validate annotations field",
+      "Add contract validation tests",
+      "Update ORCHESTRATOR.md with new contract spec",
+      "Create migration guide if needed"
+    ],
+    "acceptance_criteria": [
+      "extraction_output.py includes annotations field with full schema",
+      "rag_input.py validates annotations correctly",
+      "Contract tests pass for valid and invalid annotation data",
+      "ORCHESTRATOR.md updated with contract documentation",
+      "Both TASK_001 and TASK_002 reference correct contract version"
+    ]
+  },
+
+  "dependencies": {
+    "blocks": [],
+    "blocked_by": [
+      "TASK_001"
+    ],
+    "related": [
+      "TASK_001",
+      "TASK_002"
+    ]
+  },
+
+  "context_updates": [
+    "Contract version will be bumped to v1.1",
+    "Backward compatibility maintained: annotations field optional for now",
+    "Future version (v2.0) may make annotations required"
+  ],
+
+  "completion_criteria": [
+    "All contract validation tests pass",
+    "ORCHESTRATOR.md documentation complete",
+    "TASK_001 and TASK_002 both validate against new contracts",
+    "Integration test: extraction → RAG with contract validation"
+  ],
+
+  "progress_log": [],
+
+  "notes": "This is a cross-pipeline coordination task handled by Orchestrator. Will be updated after TASK_001 defines the annotations schema. Orchestrator will coordinate timing with TASK_002 to ensure smooth integration."
+}

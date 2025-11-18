@@ -1,0 +1,65 @@
+{
+  "task_id": "TASK_002",
+  "title": "Add Annotation Handling to RAG Pipeline",
+  "assigned_to": "rag_ai",
+  "delegated_by": "orchestrator",
+  "created_at": "2025-11-17T20:05:00Z",
+  "status": "pending",
+  "priority": "high",
+
+  "specification": {
+    "description": "Update RAG pipeline to process PDF annotations extracted by the extraction pipeline. Annotations should be chunked appropriately, included in JSONL output, and connected in the knowledge graph.",
+    "affected_packages": [
+      "rag_v14_P2",
+      "chunking_v14_P10",
+      "analysis_validation_v14_P19"
+    ],
+    "affected_pipelines": [
+      "rag"
+    ],
+    "deliverables": [
+      "Update rag_v14_P2 to accept annotations from extraction JSON",
+      "Add annotation chunking logic to chunking_v14_P10",
+      "Update JSONL schema to include annotation chunks",
+      "Add annotation nodes to knowledge graph",
+      "Update validation in analysis_validation_v14_P19 to handle annotations",
+      "Tests for annotation processing"
+    ],
+    "acceptance_criteria": [
+      "RAG pipeline successfully processes extraction JSON with annotations",
+      "Annotations chunked appropriately (by type, context)",
+      "JSONL output includes annotation chunks with proper metadata",
+      "Knowledge graph connects annotations to relevant text/figures",
+      "Validation passes for annotation fields",
+      "All tests pass"
+    ]
+  },
+
+  "dependencies": {
+    "blocks": [],
+    "blocked_by": [
+      "TASK_001"
+    ],
+    "related": [
+      "TASK_003"
+    ]
+  },
+
+  "context_updates": [
+    "Contract dependency: Requires TASK_001 to define annotations schema first",
+    "JSONL schema will be extended with annotation chunk type",
+    "Knowledge graph will have new edge type: 'annotates'"
+  ],
+
+  "completion_criteria": [
+    "All tests pass",
+    "JSONL schema documentation updated",
+    "Knowledge graph spec updated",
+    "Integration test: extraction → RAG with annotations works",
+    "Code reviewed and committed"
+  ],
+
+  "progress_log": [],
+
+  "notes": "This task is BLOCKED by TASK_001 (extraction implementation). Extraction AI must complete first so the annotations schema is defined. Orchestrator will notify when TASK_001 is complete and this can begin."
+}

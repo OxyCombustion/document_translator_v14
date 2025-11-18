@@ -1,0 +1,49 @@
+{
+  "task_id": "TASK_XXX",
+  "title": "Short descriptive title",
+  "assigned_to": "extraction_ai | rag_ai | database_ai | shared_ai",
+  "delegated_by": "orchestrator",
+  "created_at": "2025-11-17T00:00:00Z",
+  "status": "pending",
+  "priority": "medium",
+
+  "specification": {
+    "description": "Detailed task description explaining what needs to be done and why",
+    "affected_packages": [
+      "package_name_v14_PX"
+    ],
+    "affected_pipelines": [
+      "extraction | rag | database | shared"
+    ],
+    "deliverables": [
+      "Specific deliverable 1 (e.g., New class implemented)",
+      "Specific deliverable 2 (e.g., Tests written and passing)",
+      "Specific deliverable 3 (e.g., Documentation updated)"
+    ],
+    "acceptance_criteria": [
+      "Criterion 1 (e.g., All unit tests pass)",
+      "Criterion 2 (e.g., Integration tests pass)",
+      "Criterion 3 (e.g., Code reviewed)"
+    ]
+  },
+
+  "dependencies": {
+    "blocks": [],
+    "blocked_by": [],
+    "related": []
+  },
+
+  "context_updates": [
+    "Any important context or changes that affect other parts of the system"
+  ],
+
+  "completion_criteria": [
+    "All tests pass",
+    "Documentation updated",
+    "Contract validated (if applicable)"
+  ],
+
+  "progress_log": [],
+
+  "notes": "Additional context, special instructions, or important considerations"
+}
