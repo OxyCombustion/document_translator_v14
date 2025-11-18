@@ -102,142 +102,190 @@
 
 ## 📋 Pipeline Interfaces & Data Contracts
 
+**Version**: 1.0.0 (Implemented 2025-11-18)
+**Status**: ✅ Production Ready
+**Implementation**: Dataclass-based contracts (zero dependencies)
+
 ### Contract 1: Extraction → RAG
 
 **Location**: `pipelines/shared/contracts/extraction_output.py`
+**Implementation**: ExtractionOutput dataclass (427 lines)
 
-**Schema**:
+**Dataclass Structure**:
 ```python
-{
-    "document_id": str,           # Unique document identifier
-    "extractions": {
-        "equations": [             # List of equation objects
-            {
-                "equation_id": str,
-                "latex": str,
-                "image_path": str,
-                "page": int,
-                "bbox": [x1, y1, x2, y2]
-            }
-        ],
-        "tables": [                # List of table objects
-            {
-                "table_id": str,
-                "markdown": str,
-                "html": str,
-                "page": int,
-                "bbox": [x1, y1, x2, y2]
-            }
-        ],
-        "figures": [               # List of figure objects
-            {
-                "figure_id": str,
-                "image_path": str,
-                "caption": str,
-                "page": int,
-                "bbox": [x1, y1, x2, y2]
-            }
-        ],
-        "text": [                  # List of text blocks
-            {
-                "text_id": str,
-                "content": str,
-                "page": int,
-                "bbox": [x1, y1, x2, y2]
-            }
-        ]
-    },
-    "metadata": {
-        "extraction_method": str,  # "docling" | "yolo" | "hybrid"
-        "pdf_path": str,
-        "page_count": int,
-        "extraction_timestamp": str
-    },
-    "status": str,                 # "complete" | "partial" | "failed"
-    "timestamp": str               # ISO 8601 format
-}
+@dataclass
+class ExtractionOutput:
+    document_id: str                    # Unique document identifier
+    extraction_timestamp: str           # ISO 8601 timestamp
+    objects: List[ExtractedObject]      # All extracted objects
+    metadata: ExtractionMetadata        # Quality metrics and source info
+
+@dataclass
+class ExtractedObject:
+    object_id: str                      # eq_1, tbl_1, fig_1, txt_1
+    object_type: str                    # equation | table | figure | text
+    bbox: BoundingBox                   # Spatial location
+    file_path: str                      # Path to extracted file
+    confidence: float                   # 0.0-1.0
+    metadata: Dict[str, Any]            # Additional metadata
+
+@dataclass
+class BoundingBox:
+    page: int                           # Page number (1-indexed)
+    x0: float                           # Left edge
+    y0: float                           # Bottom edge
+    x1: float                           # Right edge
+    y1: float                           # Top edge
+
+@dataclass
+class ExtractionMetadata:
+    source_filename: str
+    page_count: int
+    extraction_quality: ExtractionQuality
+    file_hash: Optional[str]            # SHA256
+    doi: Optional[str]
+    title: Optional[str]
+    pipeline_version: str               # "14.0.0"
 ```
 
 **Validation Rules**:
-- ✅ `document_id` must be unique and non-empty
-- ✅ All 4 extraction types must be present (can be empty arrays)
-- ✅ Status must be one of: "complete", "partial", "failed"
-- ✅ Each extraction object must have required fields
-- ✅ Bounding boxes must be valid [x1, y1, x2, y2] with x2 > x1, y2 > y1
+- ✅ `document_id` must be non-empty and alphanumeric (+ _ -)
+- ✅ `extraction_timestamp` must be valid ISO 8601
+- ✅ `object_id` prefix must match `object_type` (eq_ for equation, etc.)
+- ✅ Object counts must match metadata quality metrics
+- ✅ Bounding boxes must have valid coordinates (x1 > x0, y1 > y0)
+- ✅ Confidence scores must be in [0.0, 1.0]
+- ✅ `page_count` must be >= 1
 
-**Failure Handling**:
-- Invalid contract → RAG pipeline rejects with clear error message
-- Missing fields → RAG pipeline cannot start processing
-- Validation failures logged for debugging
+**Usage**:
+```python
+from pipelines.shared.contracts.extraction_output import ExtractionOutput
+
+# Load and validate
+output = ExtractionOutput.from_json_file(Path("extraction_output.json"))
+output.validate()  # Raises ValueError if invalid
+
+# Save with validation
+output.to_json_file(Path("extraction_output.json"), validate=True)
+```
+
+**Example**: See `pipelines/shared/contracts/examples/extraction_output_example.json`
 
 ---
 
 ### Contract 2: RAG → Database
 
 **Location**: `pipelines/shared/contracts/rag_output.py`
+**Implementation**: RAGOutput dataclass (390 lines)
 
-**Schema**:
+**Dataclass Structure**:
 ```python
-{
-    "document_id": str,
-    "chunks": [                    # JSONL format chunks
-        {
-            "chunk_id": str,
-            "content": str,
-            "chunk_type": str,     # "text" | "equation" | "table" | "figure"
-            "metadata": {
-                "page": int,
-                "section": str,
-                "subsection": str,
-                "semantic_context": str
-            },
-            "embeddings_ready": bool
-        }
-    ],
-    "graph": {                     # Knowledge graph
-        "nodes": [
-            {
-                "node_id": str,
-                "node_type": str,  # "chunk" | "citation" | "concept"
-                "properties": dict
-            }
-        ],
-        "edges": [
-            {
-                "source": str,
-                "target": str,
-                "edge_type": str,  # "cites" | "related_to" | "contains"
-                "weight": float
-            }
-        ]
-    },
-    "validation": {
-        "chunk_count": int,
-        "avg_chunk_size": int,
-        "validation_passed": bool,
-        "validation_errors": [str]
-    }
-}
+@dataclass
+class RAGOutput:
+    document_id: str                    # Matches ExtractionOutput.document_id
+    bundles: List[RAGBundle]            # Self-contained micro-bundles
+    metadata: RAGMetadata               # Processing statistics
+    knowledge_graph: Optional[Dict]     # Optional graph data
+
+@dataclass
+class RAGBundle:
+    bundle_id: str                      # bundle:eq1_complete
+    bundle_type: str                    # equation | table | concept | figure
+    entity_id: str                      # eq:1, tbl:3, var:epsilon
+    content: Dict[str, Any]             # Type-specific content
+    usage_guidance: Dict[str, Any]      # How to use this entity
+    semantic_tags: List[str]            # Keywords for retrieval
+    embedding_metadata: Dict[str, Any]  # Vector DB metadata
+    relationships: List[Dict]           # Related entities
+
+@dataclass
+class RAGMetadata:
+    source_document_id: str
+    processing_timestamp: str           # ISO 8601
+    pipeline_version: str               # "14.0.0"
+    total_bundles: int
+    bundles_by_type: Dict[str, int]
+    total_relationships: int
+    semantic_chunks_created: int
+    citations_extracted: int
+    average_bundle_tokens: float
 ```
 
 **Validation Rules**:
-- ✅ All chunks must have unique `chunk_id`
-- ✅ Graph nodes must reference valid chunks
-- ✅ Graph edges must reference existing nodes
-- ✅ `validation_passed` must be true before database loading
+- ✅ `document_id` must match `metadata.source_document_id`
+- ✅ `bundle_id` must start with "bundle:"
+- ✅ `entity_id` must have valid prefix (eq:, tbl:, var:, concept:, etc.)
+- ✅ Bundle counts must match `metadata.total_bundles`
+- ✅ Bundles by type must match actual distribution
+- ✅ `bundle_type` must be valid (equation, table, concept, figure, text)
+- ✅ `content` cannot be empty
+
+**Usage**:
+```python
+from pipelines.shared.contracts.rag_output import RAGOutput
+
+# Load and validate (JSON)
+output = RAGOutput.from_json_file(Path("rag_output.json"))
+output.validate()
+
+# Load and validate (JSONL - preferred for vector DB)
+output = RAGOutput.from_jsonl_file(Path("rag_output.jsonl"), document_id="doc_id")
+
+# Save as JSONL (streaming format)
+output.to_jsonl_file(Path("rag_output.jsonl"), validate=True)
+```
+
+**Example**: See `pipelines/shared/contracts/examples/rag_output_example.json`
 
 ---
 
-### Contract 3: Database Input Validation
+### Contract Validation Utilities
 
-**Location**: `pipelines/shared/contracts/database_input.py`
+**Location**: `pipelines/shared/contracts/validation.py`
+**Implementation**: Validation functions (280 lines)
 
-**Requirements**:
-- ✅ JSONL file must be valid JSON Lines format
-- ✅ Each line must conform to chunk schema
-- ✅ Graph file must be valid JSON
-- ✅ All chunk references in graph must exist in JSONL
-- ✅ Metadata must include required Zotero fields
+**Available Validators**:
+```python
+from pipelines.shared.contracts.validation import (
+    validate_extraction_output,           # Basic extraction validation
+    validate_rag_output,                  # Basic RAG validation
+    validate_extraction_to_rag_handoff,   # Extraction→RAG handoff
+    validate_rag_to_database_handoff,     # RAG→Database handoff
+    validate_pipeline_handoff,            # Convenience function
+    ContractValidationError               # Custom exception
+)
+
+# Example: Validate extraction→RAG handoff
+try:
+    validate_extraction_to_rag_handoff(
+        extraction_output,
+        min_quality_score=0.5
+    )
+    print("✅ Extraction output valid for RAG ingestion")
+except ContractValidationError as e:
+    print(f"❌ Validation failed: {e}")
+```
+
+**Validation Features**:
+- Quality score thresholds
+- Completeness checks
+- File path validation
+- Relationship validation
+- Token count warnings
+- Metadata requirements
+
+---
+
+### Contract Documentation
+
+**Complete Documentation**: `pipelines/shared/contracts/README.md` (633 lines)
+
+Includes:
+- Quick start guides
+- Integration examples
+- Best practices
+- Testing instructions
+- Example files
 
 ---
 
