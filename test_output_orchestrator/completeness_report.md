@@ -1,6 +1,6 @@
 # Extraction Completeness Report
 
-**Generated**: 2025-11-16T13:14:26.699604
+**Generated**: 2025-11-16T16:44:53.673770
 
 ---
 
@@ -10,7 +10,7 @@
 |-------------|----------|-------|---------|----------|-------|
 | Tables | 12 | 7 | 5 | 58.3% | F |
 | Figures | 43 | 0 | 43 | 0.0% | F |
-| Equations | 133 | 0 | 133 | 0.0% | F |
+| Equations | 133 | 107 | 26 | 80.5% | C |
 
 ---
 
@@ -40,10 +40,8 @@
 
 ## Equations Gap Analysis
 
-### ❌ Missing Equations (133)
+### ❌ Missing Equations (26)
 
-- Equations 1-79a
-- Equations 79b-106
 - Equation 149
 - Equation 189
 - Equation 260
@@ -73,21 +71,13 @@
 
 **Action Required**: Investigate why these objects were not extracted.
 
-### ⚠️ Unexpected Equations (1)
-
-These objects were extracted but not referenced in the document:
-
-- Equation unknown
-
-**Note**: These may be false positives or objects referenced indirectly.
-
 ---
 
 ## Recommendations
 
 - **Tables**: Coverage is F (58.3%). Priority investigation needed - missing 5 objects.
 - **Figures**: Coverage is F (0.0%). Priority investigation needed - missing 43 objects.
-- **Equations**: Coverage is F (0.0%). Priority investigation needed - missing 133 objects.
+- **Equations**: Coverage is C (80.5%). Consider improving extraction methods.
 
 ---
 

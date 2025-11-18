@@ -18,14 +18,22 @@ Are you working on:
 │
 ├─ Equation extraction bugs/features?
 │  └─ Use EQUATION AI (pipelines/rag_ingestion/packages/rag_extraction_v14_P16/)
-│      [TBD - create CLAUDE_EQUATIONS.md]
+│      Read: CLAUDE_EQUATIONS.md
+│
+├─ Figure extraction bugs/features?
+│  └─ Use FIGURE AI (pipelines/rag_ingestion/packages/rag_extraction_v14_P16/)
+│      Read: CLAUDE_FIGURES.md
+│
+├─ Text extraction/semantic chunking/RAG preparation?
+│  └─ Use TEXT AI (pipelines/rag_ingestion/packages/rag_v14_P2/)
+│      Read: CLAUDE_TEXT.md
 │
 ├─ Detection configuration (YOLO/Docling)?
 │  └─ Use DETECTION AI (pipelines/extraction/packages/detection_v14_P14/)
 │      [TBD - create CLAUDE.md]
 │
 └─ Other pipeline-specific work?
-   └─ Check if pipeline has CLAUDE.md, otherwise use ROOT AI
+   └─ Check if pipeline has CLAUDE*.md, otherwise use ROOT AI
 ```
 
 ---
@@ -53,10 +61,11 @@ Are you working on:
 - Writing pipeline tests
 
 **Pipeline AI working directories**:
-- Table Extraction: `pipelines/rag_ingestion/packages/rag_extraction_v14_P16/`
-- Detection: `pipelines/extraction/packages/detection_v14_P14/`
-- RAG Chunking: `pipelines/rag_ingestion/packages/rag_v14_P2/`
-- Etc.
+- Table Extraction: `pipelines/rag_ingestion/packages/rag_extraction_v14_P16/` (CLAUDE.md)
+- Equation Extraction: `pipelines/rag_ingestion/packages/rag_extraction_v14_P16/` (CLAUDE_EQUATIONS.md)
+- Figure Extraction: `pipelines/rag_ingestion/packages/rag_extraction_v14_P16/` (CLAUDE_FIGURES.md)
+- Text/RAG Chunking: `pipelines/rag_ingestion/packages/rag_v14_P2/` (CLAUDE_TEXT.md)
+- Detection: `pipelines/extraction/packages/detection_v14_P14/` [TBD]
 
 ---
 
@@ -178,17 +187,26 @@ Equation AI: "Explain equation extraction implementation"
 
 ## 📖 CURRENT STATUS (2025-11-16)
 
-### Implemented Pipeline AIs:
-- ✅ **Table Extraction AI** - `rag_extraction_v14_P16/CLAUDE.md`
+### ✅ Implemented Pipeline AIs:
+- **Table Extraction AI** - `rag_extraction_v14_P16/CLAUDE.md`
+- **Equation Extraction AI** - `rag_extraction_v14_P16/CLAUDE_EQUATIONS.md`
+- **Figure Extraction AI** - `rag_extraction_v14_P16/CLAUDE_FIGURES.md`
+- **Text/RAG Chunking AI** - `rag_v14_P2/CLAUDE_TEXT.md`
 
-### Coming Soon:
-- 🔄 **Equation Extraction AI** - `rag_extraction_v14_P16/CLAUDE_EQUATIONS.md`
-- 🔄 **Detection AI** - `detection_v14_P14/CLAUDE.md`
-- 🔄 **RAG Chunking AI** - `rag_v14_P2/CLAUDE.md`
-- 🔄 **Curation AI** - `curation_v14_P3/CLAUDE.md`
+### 🔄 Coming Soon:
+- **Detection AI** - `detection_v14_P14/CLAUDE.md`
+- **Curation AI** - `curation_v14_P3/CLAUDE.md`
+- **Semantic Processing AI** - `semantic_processing_v14_P4/CLAUDE.md`
+- **Relationship Detection AI** - `relationship_detection_v14_P5/CLAUDE.md`
 
-### Always Available:
-- ✅ **Root AI** - `/home/thermodynamics/document_translator_v14/CLAUDE.md`
+### ✅ Always Available:
+- **Root AI** - `/home/thermodynamics/document_translator_v14/CLAUDE.md`
+
+### 📁 Status File Communication System:
+- `rag_extraction_v14_P16/STATUS_EQUATIONS.json` - Equation extraction status
+- `rag_extraction_v14_P16/STATUS_FIGURES.json` - Figure extraction status
+- `rag_extraction_v14_P16/STATUS_TABLES.json` - Table extraction status
+- `rag_v14_P2/STATUS_TEXT.json` - Text/RAG preparation status
 
 ---
 
