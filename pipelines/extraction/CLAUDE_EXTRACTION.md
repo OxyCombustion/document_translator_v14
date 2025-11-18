@@ -323,26 +323,564 @@ Stage 4: CLEANING (create_clean_13_tables.py)
 ## 🔗 Output Contract
 
 **Location**: `pipelines/shared/contracts/extraction_output.py`
+**Status**: ✅ Implemented (v1.0.0)
 
+**Contract Structure**:
 ```python
 @dataclass
 class ExtractionOutput:
-    """Contract for Extraction Pipeline output."""
-    document_id: str
-    extractions: Dict[str, List[Dict[str, Any]]]
-    metadata: Dict[str, Any]
-    status: str  # "complete" | "partial" | "failed"
-    timestamp: datetime
+    document_id: str                    # Unique document identifier
+    extraction_timestamp: str           # ISO 8601 timestamp
+    objects: List[ExtractedObject]      # All extracted objects
+    metadata: ExtractionMetadata        # Quality metrics and source info
 
-    def validate(self) -> bool:
-        """Validate contract compliance."""
-        assert self.document_id, "document_id required"
-        assert "equations" in self.extractions, "equations required"
-        assert "tables" in self.extractions, "tables required"
-        assert "figures" in self.extractions, "figures required"
-        assert "text" in self.extractions, "text required"
-        assert self.status in ["complete", "partial", "failed"]
+@dataclass
+class ExtractedObject:
+    object_id: str                      # eq_1, tbl_1, fig_1, txt_1
+    object_type: str                    # equation | table | figure | text
+    bbox: BoundingBox                   # Spatial location
+    file_path: str                      # Path to extracted file
+    confidence: float                   # 0.0-1.0
+    metadata: Dict[str, Any]            # Additional metadata
+```
+
+**Usage in Extraction Pipeline**:
+```python
+from pipelines.shared.contracts.extraction_output import (
+    ExtractionOutput,
+    ExtractedObject,
+    BoundingBox,
+    ExtractionMetadata,
+    ExtractionQuality
+)
+
+# Build extraction output
+quality = ExtractionQuality(
+    overall_score=0.93,
+    equations_extracted=108,
+    tables_extracted=13,
+    figures_extracted=47,
+    text_blocks_extracted=250
+)
+metadata = ExtractionMetadata(
+    source_filename="Ch-04_Heat_Transfer.pdf",
+    page_count=34,
+    extraction_quality=quality,
+    pipeline_version="14.0.0"
+)
+
+# Create objects list
+objects = []
+for eq_data in extracted_equations:
+    bbox = BoundingBox(page=eq_data['page'], x0=..., y0=..., x1=..., y1=...)
+    obj = ExtractedObject(
+        object_id=f"eq_{eq_data['id']}",
+        object_type="equation",
+        bbox=bbox,
+        file_path=f"equations/eq_{eq_data['id']}.png",
+        confidence=eq_data['confidence']
+    )
+    objects.append(obj)
+
+# Create output
+output = ExtractionOutput(
+    document_id="chapter4_heat_transfer",
+    extraction_timestamp=datetime.now().isoformat(),
+    objects=objects,
+    metadata=metadata
+)
+
+# Validate and save
+output.validate()  # Raises ValueError if invalid
+output.to_json_file(Path("extraction_output.json"))
+```
+
+**See**: `pipelines/shared/contracts/README.md` for complete contract documentation
+
+---
+
+## 🔧 Common Troubleshooting Scenarios
+
+### Problem 1: Low Equation Detection Rate
+
+**Symptoms**: YOLO detects fewer equations than expected (< 80% of known equations)
+
+**Common Causes**:
+1. Confidence threshold too high (`conf_threshold` > 0.6)
+2. PDF rendering quality issues
+3. Equation formatting differs from training data
+
+**Solutions**:
+```python
+# Lower confidence threshold (in detection config)
+yolo_config = {
+    "conf_threshold": 0.3,  # Default was 0.5
+    "iou_threshold": 0.5
+}
+
+# Check PDF rendering
+from PIL import Image
+img = pdf_page.get_pixmap(dpi=300)  # Higher DPI = better quality
+```
+
+**Validation**:
+```bash
+# Check detection count vs expected
+python -m specialized_extraction_v14_P15 --debug --pdf input.pdf
+# Should show detection confidence scores
+```
+
+---
+
+### Problem 2: Table Extraction Missing Cells
+
+**Symptoms**: Docling extracts table but markdown has gaps or merged cells
+
+**Common Causes**:
+1. Complex table layout (nested headers, irregular columns)
+2. Table spans multiple pages
+3. Low-quality PDF scan
+
+**Solutions**:
+```python
+# Enable table structure recovery
+docling_config = {
+    "table_structure_recovery": True,
+    "preserve_layout": True,
+    "ocr_fallback": True  # For scanned PDFs
+}
+
+# For multi-page tables, stitch results
+tables_page1 = extract_from_page(1)
+tables_page2 = extract_from_page(2)
+merged = stitch_multipage_table(tables_page1[0], tables_page2[0])
+```
+
+**Validation**:
+```bash
+# Check extracted CSV for completeness
+cat test_output_orchestrator/tables/tbl_3.csv | wc -l
+# Compare row count to visual inspection
+```
+
+---
+
+### Problem 3: Bounding Box Coordinate Mismatch
+
+**Symptoms**: Extracted bbox doesn't match visual object location
+
+**Common Causes**:
+1. PDF coordinate system confusion (origin bottom-left vs top-left)
+2. Page rotation not accounted for
+3. Scaling factor incorrect
+
+**Solutions**:
+```python
+# Convert YOLO bbox (top-left origin) to PDF bbox (bottom-left origin)
+def yolo_to_pdf_bbox(yolo_bbox, page_height):
+    x0, y0_top, x1, y1_top = yolo_bbox
+    y0_bottom = page_height - y1_top  # Flip Y axis
+    y1_bottom = page_height - y0_top
+    return (x0, y0_bottom, x1, y1_bottom)
+
+# Verify with visual overlay
+from specialized_utilities_v14_P20 import GridOverlayAgent
+overlay = GridOverlayAgent()
+overlay.draw_bbox_on_page(pdf_page, bbox, color="red")
+```
+
+**Validation**:
+```python
+# BoundingBox contract validates coordinates
+bbox = BoundingBox(page=1, x0=100, y0=200, x1=400, y1=300)
+bbox.validate()  # Raises ValueError if x1 <= x0 or y1 <= y0
+```
+
+---
+
+### Problem 4: Memory Issues with Large PDFs
+
+**Symptoms**: Pipeline crashes or hangs on PDFs > 100 pages
+
+**Common Causes**:
+1. Loading entire PDF into memory
+2. YOLO processing all pages simultaneously
+3. Image cache not cleared
+
+**Solutions**:
+```python
+# Process pages in batches
+from parallel_processing_v14_P9 import PageBatchProcessor
+
+processor = PageBatchProcessor(
+    batch_size=10,  # Process 10 pages at a time
+    clear_cache=True  # Clear image cache after each batch
+)
+
+for batch in processor.iter_batches(pdf_path):
+    results = extract_from_batch(batch)
+    save_intermediate_results(results)
+```
+
+**Configuration**:
+```yaml
+# config/extraction/performance.yaml
+memory_management:
+  batch_size: 10
+  clear_cache_interval: 5  # Clear every 5 pages
+  max_image_resolution: 300  # DPI limit
+```
+
+---
+
+### Problem 5: Duplicate Detection Across Methods
+
+**Symptoms**: Same equation detected by both YOLO and Docling
+
+**Common Causes**:
+1. Deduplication threshold too strict
+2. Bbox overlap not properly calculated
+3. Different coordinate systems not normalized
+
+**Solutions**:
+```python
+# Use extraction_comparison_v14_P12 deduplication
+from extraction_comparison_v14_P12 import deduplicate_objects
+
+deduplicated = deduplicate_objects(
+    yolo_results,
+    docling_results,
+    iou_threshold=0.5,  # 50% overlap = duplicate
+    prefer_method="yolo"  # Prefer YOLO when duplicate
+)
+```
+
+**Validation**:
+```python
+# Check for duplicates in output
+from collections import Counter
+ids = [obj.object_id for obj in output.objects]
+duplicates = [id for id, count in Counter(ids).items() if count > 1]
+assert len(duplicates) == 0, f"Duplicate IDs found: {duplicates}"
+```
+
+---
+
+## ⚡ Performance Tuning Guide
+
+### Optimization 1: Parallel Page Processing
+
+**Current**: Sequential page processing (1 page at a time)
+**Optimized**: Parallel processing (4-8 pages simultaneously)
+
+```python
+# Enable parallel processing in config
+parallel_config = {
+    "enabled": True,
+    "num_workers": 4,  # Adjust based on CPU cores
+    "chunk_size": 8    # Pages per worker
+}
+
+# Use parallel_processing_v14_P9
+from parallel_processing_v14_P9 import ParallelExtractor
+
+extractor = ParallelExtractor(config=parallel_config)
+results = extractor.extract_parallel(pdf_path)
+```
+
+**Performance Gain**: 3-4x speedup on multi-core systems
+
+---
+
+### Optimization 2: YOLO Batch Inference
+
+**Current**: YOLO processes 1 image at a time
+**Optimized**: Batch inference (4-8 images per forward pass)
+
+```python
+# Configure batch size
+yolo_config = {
+    "batch_size": 8,  # Process 8 pages per batch
+    "half_precision": True  # Use FP16 for 2x speedup on GPU
+}
+
+# Batch images before YOLO call
+images_batch = [render_page(i) for i in range(batch_start, batch_end)]
+detections = yolo_model(images_batch, conf=0.3)
+```
+
+**Performance Gain**: 2x speedup, especially on GPU
+
+---
+
+### Optimization 3: Image Caching
+
+**Strategy**: Cache rendered pages to avoid re-rendering
+
+```python
+# Enable image cache
+from functools import lru_cache
+
+@lru_cache(maxsize=50)
+def render_page_cached(pdf_path, page_num, dpi=300):
+    """Render page with caching."""
+    doc = fitz.open(pdf_path)
+    page = doc[page_num]
+    pix = page.get_pixmap(dpi=dpi)
+    return pix
+
+# Clear cache when done
+render_page_cached.cache_clear()
+```
+
+**Performance Gain**: 50% speedup on repeat extractions
+
+---
+
+### Optimization 4: Reduce Image Resolution
+
+**Trade-off**: Lower DPI = faster processing, slightly lower accuracy
+
+```python
+# Adjust DPI based on content type
+dpi_settings = {
+    "equations": 300,  # High DPI for LaTeX clarity
+    "tables": 200,     # Medium DPI for table structure
+    "text": 150,       # Low DPI sufficient for text
+    "figures": 250     # Medium-high DPI for figure details
+}
+
+# Adaptive rendering
+def render_for_content_type(page, content_type):
+    dpi = dpi_settings.get(content_type, 300)
+    return page.get_pixmap(dpi=dpi)
+```
+
+**Performance Gain**: 30-40% speedup with minimal accuracy loss
+
+---
+
+### Optimization 5: Skip Empty Pages
+
+**Strategy**: Detect empty pages early and skip processing
+
+```python
+# Quick empty page check
+def is_page_empty(page):
+    """Fast check for empty pages."""
+    text = page.get_text().strip()
+    if len(text) < 50:  # Less than 50 chars = likely empty
         return True
+    return False
+
+# Skip empty pages
+for page_num in range(pdf.page_count):
+    page = pdf[page_num]
+    if is_page_empty(page):
+        continue
+    process_page(page)
+```
+
+**Performance Gain**: 10-20% speedup on documents with many blank pages
+
+---
+
+## 📦 Package-Specific Examples
+
+### extraction_v14_P1: Main Orchestrator
+
+**Example: Custom Extraction Workflow**
+
+```python
+from extraction_v14_P1 import ExtractionOrchestrator
+
+# Configure custom workflow
+config = {
+    "detection_methods": ["yolo", "docling"],
+    "parallel": True,
+    "output_format": "contract",  # Use ExtractionOutput contract
+    "post_processing": {
+        "deduplicate": True,
+        "clean_tables": True,
+        "validate_output": True
+    }
+}
+
+# Run extraction
+orchestrator = ExtractionOrchestrator(config)
+result = orchestrator.extract(pdf_path="Ch-04_Heat_Transfer.pdf")
+
+# result is ExtractionOutput instance
+result.validate()
+result.to_json_file(Path("extraction_output.json"))
+```
+
+---
+
+### specialized_extraction_v14_P15: YOLO Detection
+
+**Example: Equation-Only Extraction**
+
+```python
+from specialized_extraction_v14_P15 import YOLODetector
+
+# Configure for equations only
+detector = YOLODetector(
+    object_types=["equation"],  # Only detect equations
+    conf_threshold=0.3,
+    model_path="models/doclayout_yolo.pt"
+)
+
+# Detect equations
+equations = detector.detect_objects(
+    pdf_path="document.pdf",
+    pages=[4, 5, 6]  # Only process specific pages
+)
+
+# Results include bounding boxes and confidence
+for eq in equations:
+    print(f"Equation {eq['id']} on page {eq['page']}")
+    print(f"  Confidence: {eq['confidence']:.2f}")
+    print(f"  Bbox: {eq['bbox']}")
+```
+
+---
+
+### detection_v14_P14: Docling Tables
+
+**Example: Table Extraction with Markdown Export**
+
+```python
+from detection_v14_P14 import DoclingTableExtractor
+
+# Configure table extraction
+extractor = DoclingTableExtractor(
+    export_format="markdown",
+    structure_recovery=True,
+    preserve_formatting=True
+)
+
+# Extract tables
+tables = extractor.extract_tables(
+    pdf_path="document.pdf",
+    output_dir="tables/"
+)
+
+# Each table includes:
+# - table_id
+# - markdown representation
+# - CSV file path
+# - bounding box
+for table in tables:
+    print(f"Table {table['id']}: {table['markdown'][:100]}...")
+    print(f"  Saved to: {table['csv_path']}")
+```
+
+---
+
+### extraction_comparison_v14_P12: Method Comparison
+
+**Example: Quality Scoring Across Methods**
+
+```python
+from extraction_comparison_v14_P12 import ExtractionComparer
+
+# Compare YOLO vs Docling
+comparer = ExtractionComparer()
+comparison = comparer.compare_methods(
+    pdf_path="document.pdf",
+    methods=["yolo", "docling", "hybrid"],
+    ground_truth_path="ground_truth.json"  # Optional
+)
+
+# Get quality metrics
+print(f"YOLO precision: {comparison['yolo']['precision']:.2f}")
+print(f"Docling recall: {comparison['docling']['recall']:.2f}")
+print(f"Hybrid F1-score: {comparison['hybrid']['f1']:.2f}")
+
+# Recommendation
+best_method = comparison['recommended_method']
+print(f"Best method for this document: {best_method}")
+```
+
+---
+
+### extraction_utilities_v14_P18: Helper Functions
+
+**Example: Coordinate Transformation**
+
+```python
+from extraction_utilities_v14_P18 import CoordinateTransformer
+
+# Transform coordinates between systems
+transformer = CoordinateTransformer()
+
+# YOLO (top-left origin) to PDF (bottom-left origin)
+pdf_bbox = transformer.yolo_to_pdf(
+    yolo_bbox=(100, 50, 400, 200),
+    page_height=792  # US Letter height in points
+)
+
+# PDF to image coordinates
+img_bbox = transformer.pdf_to_image(
+    pdf_bbox=(100, 200, 400, 300),
+    dpi=300,
+    page_size=(612, 792)
+)
+
+# Validate transformed bbox
+assert img_bbox[2] > img_bbox[0], "Invalid X coordinates"
+assert img_bbox[3] > img_bbox[1], "Invalid Y coordinates"
+```
+
+---
+
+## 💡 Best Practices
+
+### 1. Always Validate Output Contracts
+
+```python
+# ✅ Good: Validate before saving
+output.validate()
+output.validate_completeness()
+output.to_json_file(path)
+
+# ❌ Bad: Skip validation
+output.to_json_file(path, validate=False)
+```
+
+### 2. Use Hybrid Detection for Best Results
+
+```python
+# ✅ Good: Combine YOLO + Docling
+config = {"methods": ["yolo", "docling"], "deduplicate": True}
+
+# ⚠️ Adequate: Single method may miss objects
+config = {"methods": ["yolo"]}
+```
+
+### 3. Monitor Quality Metrics
+
+```python
+# Track extraction quality
+quality = output.metadata.extraction_quality
+if quality.overall_score < 0.7:
+    logger.warning(f"Low quality: {quality.overall_score:.2f}")
+    # Consider re-running with different settings
+```
+
+### 4. Clean Table Outputs
+
+```python
+# Always run cleaning for production use
+from extraction_utilities_v14_P18 import TableCleaner
+
+cleaner = TableCleaner()
+clean_tables = cleaner.filter_false_positives(
+    raw_tables,
+    min_confidence=0.5,
+    min_cells=4
+)
 ```
 
 ---
