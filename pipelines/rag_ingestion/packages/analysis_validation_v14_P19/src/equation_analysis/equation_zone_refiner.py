@@ -21,7 +21,10 @@ from __future__ import annotations
 
 from typing import Dict, List, Tuple, Any
 import re
-from src.agents.equation_refinement_agent.agent import EquationRefinementAgent, EquationRefineOptions
+from pipelines.extraction.packages.extraction_v14_P1.src.agents.equation.equation_refinement_agent import (
+    EquationRefinementAgent,
+    EquationRefineOptions
+)
 
 
 def _collect_line_boxes(page) -> List[Dict[str, Any]]:

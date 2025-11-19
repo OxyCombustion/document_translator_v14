@@ -1,6 +1,6 @@
 """Context management utilities."""
 
-# Note: agent_context_lifecycle_manager has v13 import style (from core...) - needs migration
-# from .agent_context_lifecycle_manager import *
+# V14: agent_context_lifecycle_manager has been migrated to v14 import style
+from .agent_context_lifecycle_manager import AgentContextLifecycleManager
 
-__all__ = []  # Will be populated during import cleanup
+__all__ = ['AgentContextLifecycleManager']

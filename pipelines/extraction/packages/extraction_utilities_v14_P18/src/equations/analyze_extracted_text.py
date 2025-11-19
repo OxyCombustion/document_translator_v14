@@ -17,13 +17,20 @@ if sys.platform == 'win32':
             pass
 
 # Import our simple extractor
-from simple_equation_extractor import SimpleEquationExtractor
+# TODO: simple_equation_extractor module does not exist in v14
+# This standalone analysis script needs to be updated or removed
+# from simple_equation_extractor import SimpleEquationExtractor
 
 def analyze_text_for_equations():
     """Analyze the extracted text to find equation patterns"""
-    
+
+    raise NotImplementedError(
+        "This script depends on SimpleEquationExtractor which is not available in v14. "
+        "Please use extraction_v14_P1 or specialized_extraction_v14_P15 instead."
+    )
+
     # Create extractor and get text
-    extractor = SimpleEquationExtractor()
+    # extractor = SimpleEquationExtractor()
     text_content = extractor._extract_text_with_docling(Path('../../../tests/test_data/Ch-04_Heat_Transfer.pdf'))
     
     print(f"Text length: {len(text_content)} characters")
