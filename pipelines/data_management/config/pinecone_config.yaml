@@ -1,0 +1,279 @@
+# Pinecone Configuration for Data Management Pipeline
+# Production-ready configuration for cloud vector database
+# Last Updated: 2025-11-20
+
+# ============================================================================
+# API Configuration
+# ============================================================================
+pinecone:
+  # API Key: Set via environment variable for security
+  # export PINECONE_API_KEY="your-api-key-here"
+  api_key: "${PINECONE_API_KEY}"
+
+  # Environment: Pinecone environment/region
+  environment: "us-east-1"
+
+  # Mock Mode: Enable for testing without API key
+  # Set to true to simulate Pinecone operations locally
+  mock_mode: false
+
+# ============================================================================
+# Index Configuration
+# ============================================================================
+index:
+  # Default index name
+  name: "thermodynamics-v14"
+
+  # Embedding dimension (must match your embedding model)
+  # - 384: SentenceTransformers all-MiniLM-L6-v2 (fast, local)
+  # - 768: SentenceTransformers all-mpnet-base-v2 (better quality)
+  # - 1536: OpenAI text-embedding-ada-002 (best quality)
+  dimension: 384
+
+  # Distance metric
+  # Options: cosine, euclidean, dotproduct
+  # Recommendation: cosine (normalized vectors, 0-1 similarity)
+  metric: "cosine"
+
+  # Serverless specification
+  serverless:
+    # Cloud provider: aws, gcp, azure
+    cloud: "aws"
+
+    # Cloud region
+    # AWS regions: us-east-1, us-west-2, eu-west-1
+    # GCP regions: us-central1, us-west1, europe-west4
+    # Azure regions: eastus, westus2, northeurope
+    region: "us-east-1"
+
+# ============================================================================
+# Namespace Configuration
+# ============================================================================
+# Namespaces provide logical isolation within a single index
+# Use cases:
+# - Multi-tenancy: Separate data by user/organization
+# - Document isolation: Separate data by document
+# - Collection isolation: Separate data by collection type
+namespace:
+  # Strategy: document, collection, or flat
+  # - document: One namespace per document (chapter_4, chapter_5, etc.)
+  # - collection: One namespace per collection type (equations, figures, text)
+  # - flat: No namespaces (all data in default namespace)
+  strategy: "document"
+
+  # Default namespace (empty string = default)
+  default: ""
+
+  # Auto-create namespaces based on metadata
+  auto_create: true
+
+  # Namespace naming pattern
+  # Variables: {document_id}, {collection_name}, {date}
+  naming_pattern: "{document_id}"
+
+# ============================================================================
+# Batch Processing Configuration
+# ============================================================================
+batch_processing:
+  # Batch size for upsert operations
+  # Recommendation: 100-200 vectors per batch
+  # Larger batches = better throughput, but higher memory
+  batch_size: 100
+
+  # Maximum retry attempts for failed batches
+  max_retries: 3
+
+  # Initial retry delay (seconds)
+  # Uses exponential backoff: delay * 2^attempt
+  retry_delay: 2.0
+
+  # Timeout for operations (seconds)
+  timeout: 60
+
+# ============================================================================
+# Hybrid Search Configuration
+# ============================================================================
+hybrid_search:
+  # Enable hybrid search (sparse + dense vectors)
+  enabled: false
+
+  # Alpha: Balance between sparse and dense search
+  # - 0.0: Pure sparse (keyword) search
+  # - 1.0: Pure dense (semantic) search
+  # - 0.5: Equal weight (recommended starting point)
+  alpha: 0.5
+
+  # BM25 encoder configuration (for sparse vectors)
+  bm25:
+    # Corpus file for fitting BM25
+    corpus_file: "results/rag/corpus.txt"
+
+    # BM25 parameters
+    k1: 1.5  # Term frequency saturation
+    b: 0.75  # Length normalization
+
+# ============================================================================
+# Query Configuration
+# ============================================================================
+query:
+  # Default top_k for queries
+  default_top_k: 10
+
+  # Maximum top_k allowed
+  max_top_k: 100
+
+  # Include metadata in query results
+  include_metadata: true
+
+  # Include document text in query results
+  include_documents: true
+
+  # Metadata filter optimization
+  # Pre-filter: Apply filters before similarity search (faster)
+  # Post-filter: Apply filters after similarity search (more accurate)
+  filter_mode: "pre-filter"
+
+# ============================================================================
+# Metadata Configuration
+# ============================================================================
+metadata:
+  # Maximum metadata size per vector (bytes)
+  # Pinecone limit: ~40KB per vector
+  max_size: 40000
+
+  # Fields to index for filtering
+  # Indexed fields enable efficient metadata filtering
+  indexed_fields:
+    - "page_number"
+    - "section_id"
+    - "chunk_type"
+    - "has_citations"
+    - "citation_count"
+
+  # Fields to exclude from indexing (save space)
+  # These can still be stored but not filtered efficiently
+  excluded_fields:
+    - "text"  # Document text stored but not indexed
+    - "raw_content"
+
+  # Metadata preparation
+  truncate_text: true  # Truncate text fields if too long
+  flatten_lists: false  # Keep lists as arrays (Pinecone supports this)
+
+# ============================================================================
+# Performance Configuration
+# ============================================================================
+performance:
+  # Connection pool size
+  pool_size: 10
+
+  # Request timeout (seconds)
+  timeout: 30
+
+  # Enable request compression
+  compression: true
+
+  # Monitoring and logging
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_queries: false  # Log all queries (for debugging)
+  log_upserts: true   # Log upsert operations
+
+# ============================================================================
+# Cost Optimization
+# ============================================================================
+cost:
+  # Serverless pricing notes (as of 2025-11-20):
+  # - Storage: ~$0.002 per GB-hour
+  # - Read units: ~$0.25 per million
+  # - Write units: ~$2.00 per million
+  #
+  # Cost estimation for 10,000 chunks (384-dim):
+  # - Storage: ~15 MB = $0.03/hour = $22/month
+  # - Reads (10k/day): ~300k/month = $0.08/month
+  # - Writes (1k/day): ~30k/month = $0.06/month
+  # Total: ~$22.14/month
+
+  # Auto-delete indexes after inactivity (hours)
+  # Set to 0 to disable auto-deletion
+  auto_delete_after: 0
+
+  # Archive to cold storage after (days)
+  # Set to 0 to disable archiving
+  archive_after: 0
+
+# ============================================================================
+# Development/Testing Configuration
+# ============================================================================
+development:
+  # Use smaller index for testing
+  test_index_name: "thermodynamics-v14-test"
+
+  # Use smaller batches for testing
+  test_batch_size: 10
+
+  # Enable verbose logging
+  verbose: true
+
+  # Dry run mode: Validate without actually upserting
+  dry_run: false
+
+# ============================================================================
+# Migration Configuration
+# ============================================================================
+migration:
+  # ChromaDB to Pinecone migration settings
+  chromadb:
+    # Source ChromaDB directory
+    source_directory: "test_output_database/chromadb"
+
+    # Collection name to migrate
+    collection_name: "chapter_4_heat_transfer"
+
+  # Migration strategy
+  strategy: "incremental"  # full, incremental
+
+  # Batch size for migration
+  batch_size: 100
+
+  # Validation after migration
+  validate: true
+
+  # Validation sample size
+  validation_sample_size: 100
+
+# ============================================================================
+# Example Configurations by Use Case
+# ============================================================================
+# Uncomment and modify for your specific use case
+
+# --- Local Development ---
+# local_dev:
+#   mock_mode: true
+#   index:
+#     dimension: 384
+#   batch_processing:
+#     batch_size: 10
+
+# --- Production (High Performance) ---
+# production:
+#   index:
+#     dimension: 1536  # OpenAI embeddings
+#     metric: cosine
+#     serverless:
+#       cloud: aws
+#       region: us-east-1
+#   batch_processing:
+#     batch_size: 200
+#     max_retries: 5
+#   hybrid_search:
+#     enabled: true
+#     alpha: 0.5
+
+# --- Cost-Optimized (Small Scale) ---
+# cost_optimized:
+#   index:
+#     dimension: 384  # SentenceTransformers
+#   batch_processing:
+#     batch_size: 50
+#   namespace:
+#     strategy: flat  # Reduce overhead

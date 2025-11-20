@@ -1,0 +1,273 @@
+# ============================================================================
+# Semantic Chunking Configuration
+# For RAG Pipeline v14 - Semantic Processing Package (P4)
+# ============================================================================
+#
+# This configuration file controls ALL aspects of semantic document processing:
+# - Structure detection (chapters, sections, parts)
+# - Memory management and subdivision
+# - Processing parallelization
+# - Output formatting and aggregation
+#
+# IMPORTANT: This file is referenced by multiple modules. Changes affect:
+# - semantic_structure_detector.py
+# - hierarchical_processing_planner.py
+# - semantic_hierarchical_processor.py
+# - document_classifier.py (if present)
+# - structure_detector.py (if present)
+#
+# Last updated: 2025-11-19
+# ============================================================================
+
+
+# ============================================================================
+# STRUCTURE DETECTION
+# ============================================================================
+# Controls how the system detects logical document structure (chapters,
+# sections, parts) using regex patterns and font analysis.
+
+structure_detection:
+  # Whether to scan entire document or just first/last pages
+  # true = more accurate but slower, false = faster but may miss structure
+  scan_entire_document: true
+
+  # Pages to scan when scan_entire_document is false
+  scan_first_pages: 5
+  scan_last_pages: 3
+
+  # -------------------------------------------------------------------------
+  # Chapter Detection Patterns
+  # -------------------------------------------------------------------------
+  # Each pattern must have: pattern (regex), confidence (0.0-1.0), type (name)
+  chapter_patterns:
+    - pattern: '^\s*Chapter\s+(\d+)\s*[:\-]?\s*(.+)?$'
+      confidence: 0.95
+      type: 'numbered_chapter'
+
+    - pattern: '^\s*CHAPTER\s+([IVXLCDM]+)\s*[:\-]?\s*(.+)?$'
+      confidence: 0.90
+      type: 'roman_chapter'
+
+    - pattern: '^\s*Ch\.?\s*(\d+)\s*[:\-]?\s*(.+)?$'
+      confidence: 0.85
+      type: 'abbreviated_chapter'
+
+    - pattern: '^\s*Part\s+([IVXLCDM]+|One|Two|Three|Four|Five)\s*[:\-]?\s*(.+)?$'
+      confidence: 0.88
+      type: 'part'
+
+  # -------------------------------------------------------------------------
+  # Section Detection Patterns
+  # -------------------------------------------------------------------------
+  section_patterns:
+    - pattern: '^\s*(\d+\.\d+)\s+([A-Z].+)$'
+      confidence: 0.90
+      type: 'numbered_section'
+
+    - pattern: '^\s*Section\s+(\d+)\s*[:\-]?\s*(.+)?$'
+      confidence: 0.85
+      type: 'explicit_section'
+
+    - pattern: '^\s*([A-Z][A-Z\s]{3,50})$'
+      confidence: 0.70
+      type: 'caps_section'
+
+  # -------------------------------------------------------------------------
+  # Font-based Detection
+  # -------------------------------------------------------------------------
+  # Uses font size analysis to detect headings when patterns fail
+  font_detection:
+    enabled: true
+    title_font_size_threshold: 14.0
+    section_font_size_threshold: 12.0
+    min_size_ratio: 1.3  # Minimum ratio of max_font / avg_font to detect heading
+
+  # -------------------------------------------------------------------------
+  # Structure Detection Patterns (for document_classifier.py)
+  # -------------------------------------------------------------------------
+  # Regex patterns for detecting document structure elements
+  patterns:
+    chapter: '(?:^|\n)\s*(?:Chapter|CHAPTER)\s+(?:\d+|[IVXLCDM]+)'
+    section: '\d+\.\d+(?:\.\d+)?'  # Matches 1.1, 1.1.1, etc.
+    subsection: '\d+\.\d+\.\d+'  # Matches 1.1.1, 1.2.3, etc.
+    abstract: '(?:^|\n)\s*(?:Abstract|ABSTRACT)\s*(?:\n|:)'
+    introduction: '(?:^|\n)\s*(?:Introduction|INTRODUCTION)\s*(?:\n|:)'
+    methods: '(?:^|\n)\s*(?:Methods?|Methodology|METHODS?)\s*(?:\n|:)'
+    results: '(?:^|\n)\s*(?:Results?|RESULTS?)\s*(?:\n|:)'
+    discussion: '(?:^|\n)\s*(?:Discussion|DISCUSSION)\s*(?:\n|:)'
+    conclusion: '(?:^|\n)\s*(?:Conclusion|CONCLUSION)\s*(?:\n|:)'
+    references: '(?:^|\n)\s*(?:References?|Bibliography|REFERENCES?)\s*(?:\n|:)'
+
+  # -------------------------------------------------------------------------
+  # Scoring Weights (for confidence calculation)
+  # -------------------------------------------------------------------------
+  scoring_weights:
+    chapter_found: 0.30
+    section_found: 0.20
+    abstract_found: 0.15
+    references_found: 0.10
+    toc_found: 0.25  # Table of contents (not yet implemented)
+
+
+# ============================================================================
+# MEMORY MANAGEMENT
+# ============================================================================
+# Controls memory-efficient subdivision of large sections
+
+memory:
+  # Maximum pages per processing unit before subdivision is required
+  # Larger = fewer units but more memory, smaller = more units but less memory
+  max_unit_pages: 100
+
+  # Overlap between chunks (in pages) to maintain context
+  chunk_overlap_pages: 5
+
+
+# ============================================================================
+# PROCESSING SETTINGS
+# ============================================================================
+# Controls parallel processing and subdivision strategies
+
+processing:
+  # Whether to enable parallel processing of units
+  enable_parallel: true
+
+  # Worker configuration
+  auto_detect_workers: true  # Automatically detect optimal worker count
+  min_workers: 1
+  max_workers: 8
+
+  # Subdivision method for large sections
+  # Options: 'balanced' (evenly sized chunks) or 'fixed_size' (max_unit_pages each)
+  subdivision_method: 'balanced'
+
+
+# ============================================================================
+# OUTPUT SETTINGS
+# ============================================================================
+# Controls output directory structure and file formats
+
+output:
+  # Output format
+  format: 'jsonl'
+  include_metadata: true
+  include_page_images: false
+
+  # Directory naming formats (use {num:02d} for zero-padded numbers, {title_slug} for titles)
+  chapter_dir_format: 'chapter_{num:02d}_{title_slug}'
+  section_dir_format: 'section_{num:02d}_{title_slug}'
+
+  # Aggregation settings
+  create_aggregated_views: true  # Create combined views for subdivided sections
+
+
+# ============================================================================
+# CHUNKING SETTINGS
+# ============================================================================
+# Fine-grained chunking within processing units (for future use)
+
+chunking:
+  max_pages_per_chunk: 50
+  min_pages_per_chunk: 10
+  preserve_section_boundaries: true
+
+
+# ============================================================================
+# AGGREGATION SETTINGS
+# ============================================================================
+# Controls how chunks are aggregated back to section level
+
+aggregation:
+  enabled: true
+  create_section_summaries: true
+  merge_chunk_metadata: true
+
+
+# ============================================================================
+# DOCUMENT CLASSIFICATION (for document_classifier.py if used)
+# ============================================================================
+# Controls document type detection and user interaction
+
+document_types:
+  # Zotero item type to document type mappings
+  zotero_mappings:
+    book: "book"
+    bookSection: "book_chapter"
+    journalArticle: "journal_article"
+    conferencePaper: "conference_paper"
+    thesis: "thesis"
+    report: "technical_report"
+    manuscript: "manuscript"
+
+  # Confidence thresholds
+  confidence:
+    zotero_source: 0.95  # High confidence from Zotero metadata
+    user_confirmation_threshold: 0.90  # Ask user if below this
+
+
+# ============================================================================
+# USER INTERACTION (for document_classifier.py if used)
+# ============================================================================
+
+user_interaction:
+  ask_on_low_confidence: false  # Set to true to enable user confirmation prompts
+  timeout_seconds: 60
+
+
+# ============================================================================
+# CHUNKING STRATEGIES (for document_classifier.py if used)
+# ============================================================================
+# Different strategies based on document type
+
+chunking_strategies:
+  strategies:
+    sections:
+      description: "Chunk by logical sections (best for structured documents)"
+      target_tokens: 512
+      max_tokens: 768
+      min_tokens: 256
+      overlap_tokens: 50
+      boundary_type: "section"
+
+    chapters:
+      description: "Chunk by chapters (best for books)"
+      target_tokens: 1024
+      max_tokens: 1536
+      min_tokens: 512
+      overlap_tokens: 100
+      boundary_type: "chapter"
+
+    paragraphs:
+      description: "Chunk by paragraphs (fallback for unstructured documents)"
+      target_tokens: 256
+      max_tokens: 512
+      min_tokens: 128
+      overlap_tokens: 25
+      boundary_type: "paragraph"
+
+    papers:
+      description: "Chunk by paper sections (abstract, intro, methods, results, etc.)"
+      target_tokens: 384
+      max_tokens: 640
+      min_tokens: 192
+      overlap_tokens: 40
+      boundary_type: "paper_section"
+
+  # Selection rules (evaluated in order)
+  selection_rules:
+    - condition: "has_chapters"
+      strategy: "chapters"
+
+    - condition: "has_sections"
+      strategy: "sections"
+
+    - condition: "is_paper and has_abstract"
+      strategy: "papers"
+
+    - condition: "fallback"
+      strategy: "paragraphs"
+
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================

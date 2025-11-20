@@ -1,0 +1,63 @@
+================================================================================
+END-TO-END INTEGRATION TEST - Document Translator v14
+================================================================================
+Test Date: 2025-11-19 22:38:14
+Test Document: Ch-04_Heat_Transfer.pdf (34 pages)
+
+PIPELINE EXECUTION RESULTS
+--------------------------------------------------------------------------------
+
+PIPELINE 1: EXTRACTION
+  Status: ✅ PASS
+  Duration: 8.9m (534.3s)
+  Objects extracted: 120
+  Equations: 107
+  Tables: 20
+
+PIPELINE 2: RAG INGESTION
+  Status: ✅ PASS
+  Duration: 2.7s
+  Chunks created: 34
+  Total characters: 130,316
+  Citations extracted: 162
+
+PIPELINE 3: DATABASE LOADING
+  Status: ✅ PASS
+  Duration: 5.2s
+  Chunks inserted: 34
+  Database size: 7.91 MB
+
+
+DATA FLOW VALIDATION
+--------------------------------------------------------------------------------
+  Extraction → RAG: ✅ PASS
+  RAG → Database: ✅ PASS
+  Data Integrity: ✅ PASS
+
+
+QUERY RETRIEVAL TESTING
+--------------------------------------------------------------------------------
+  Semantic queries: 5/5 passed
+    ✅ Should find equations and heat transfer theory
+    ✅ Should find technical content about convection
+    ✅ Should find relevant sections on radiation
+    ✅ Should find equations related to conductivity
+    ✅ Should find application sections
+  Citation filters: 2/2 passed
+  Source tracing: ✅ PASS
+
+
+PERFORMANCE SUMMARY
+--------------------------------------------------------------------------------
+  Total duration: 9.0m (542.2s)
+  Throughput: 3.76 pages/minute
+
+  Time breakdown:
+    Extraction: 8.9m (534.3s) (98.6%)
+    Rag: 2.7s (0.5%)
+    Database: 5.2s (0.9%)
+
+
+================================================================================
+OVERALL STATUS: ✅ INTEGRATION TEST PASSED
+================================================================================

@@ -1,0 +1,105 @@
+================================================================================
+CITATION GRAPH VALIDATION REPORT
+================================================================================
+
+Document: test_data/Ch-04_Heat_Transfer.pdf
+Total Chunks: 34
+Total Citations: 162
+
+--------------------------------------------------------------------------------
+CITATIONS BY TYPE
+--------------------------------------------------------------------------------
+Figure: 72
+Table: 19
+Equation: 42
+Chapter: 17
+Reference: 12
+
+--------------------------------------------------------------------------------
+TOP REFERENCED OBJECTS (by chunk count)
+--------------------------------------------------------------------------------
+
+FIGURE:
+  11: referenced in 5 chunks
+  1: referenced in 4 chunks
+  13: referenced in 3 chunks
+  16: referenced in 3 chunks
+  33: referenced in 3 chunks
+  3: referenced in 2 chunks
+  5: referenced in 2 chunks
+  6: referenced in 2 chunks
+  7: referenced in 2 chunks
+  8: referenced in 2 chunks
+
+TABLE:
+  4: referenced in 3 chunks
+  5: referenced in 3 chunks
+  6: referenced in 2 chunks
+  7: referenced in 2 chunks
+  11: referenced in 2 chunks
+  1: referenced in 1 chunks
+  2: referenced in 1 chunks
+  3: referenced in 1 chunks
+  9: referenced in 1 chunks
+  8a: referenced in 1 chunks
+
+CHAPTER:
+  6: referenced in 4 chunks
+  23: referenced in 3 chunks
+  4: referenced in 2 chunks
+  3: referenced in 2 chunks
+  5: referenced in 2 chunks
+  8: referenced in 1 chunks
+  17: referenced in 1 chunks
+  19: referenced in 1 chunks
+  21: referenced in 1 chunks
+
+REFERENCE:
+  1: referenced in 2 chunks
+  2: referenced in 2 chunks
+  4: referenced in 2 chunks
+  16: referenced in 2 chunks
+  10: referenced in 2 chunks
+  16 
+and 17: referenced in 1 chunks
+  17: referenced in 1 chunks
+
+EQUATION:
+  4: referenced in 3 chunks
+  1: referenced in 3 chunks
+  21: referenced in 2 chunks
+  23: referenced in 2 chunks
+  11: referenced in 2 chunks
+  28: referenced in 2 chunks
+  39: referenced in 2 chunks
+  56: referenced in 2 chunks
+  58: referenced in 2 chunks
+  9: referenced in 1 chunks
+
+--------------------------------------------------------------------------------
+CHUNKS WITHOUT CITATIONS: 2
+--------------------------------------------------------------------------------
+  unit_001_page_000
+  unit_001_page_002
+
+--------------------------------------------------------------------------------
+VALIDATION AGAINST INVENTORY
+--------------------------------------------------------------------------------
+
+FIGURE:
+  Matched: 43
+  Orphaned (cited but not in inventory): 0
+  Unused (in inventory but not cited): 0
+
+TABLE:
+  Matched: 12
+  Orphaned (cited but not in inventory): 0
+  Unused (in inventory but not cited): 0
+
+EQUATION:
+  Matched: 31
+  Orphaned (cited but not in inventory): 0
+  Unused (in inventory but not cited): 102
+    ['100', '101', '102', '103', '104', '105', '106', '1093', '1204', '1262', '13', '1316', '14', '1427', '149'] ... and 87 more
+
+================================================================================

@@ -50,6 +50,14 @@ from datetime import datetime
 # Import Zone from base agent (v14 package import)
 from pipelines.shared.packages.common.src.base.base_extraction_agent import Zone
 
+# Import GPU utilities
+try:
+    from pipelines.shared.packages.common.src.gpu_utils import GPUManager
+    GPU_UTILS_AVAILABLE = True
+except ImportError:
+    GPU_UTILS_AVAILABLE = False
+    print("⚠️  GPU utilities not available. Install gpu_utils.py for GPU acceleration.")
+
 
 @dataclass
 class Detection:
@@ -91,16 +99,33 @@ class UnifiedDetectionModule:
         'title': 'title'
     }
 
-    def __init__(self, model_path: str, confidence_threshold: float = 0.2):
+    def __init__(self, model_path: str, confidence_threshold: float = 0.2,
+                 use_gpu: bool = True, enable_mixed_precision: bool = True):
         """
         Initialize unified detector.
 
         Args:
             model_path: Path to DocLayout-YOLO model
             confidence_threshold: Minimum confidence (default: 0.2)
+            use_gpu: Enable GPU acceleration if available (default: True)
+            enable_mixed_precision: Enable mixed precision for GPU (default: True)
         """
         self.model_path = model_path
         self.confidence_threshold = confidence_threshold
+        self.use_gpu = use_gpu
+        self.enable_mixed_precision = enable_mixed_precision
+
+        # Initialize GPU manager
+        self.gpu_manager = None
+        if use_gpu and GPU_UTILS_AVAILABLE:
+            self.gpu_manager = GPUManager(enable_amp=enable_mixed_precision)
+            if self.gpu_manager.is_available():
+                print(f"✅ GPU acceleration enabled: {self.gpu_manager.get_info().device_name}")
+                if enable_mixed_precision:
+                    print(f"✅ Mixed precision (FP16) enabled")
+            else:
+                print(f"ℹ️  GPU requested but not available, using CPU")
+                self.gpu_manager = None
 
     def detect_all_objects(self, pdf_path: Path, num_workers: int = 8,
                           start_page: int = 0, end_page: Optional[int] = None) -> List[Zone]:
@@ -122,6 +147,14 @@ class UnifiedDetectionModule:
         print(f"PDF: {pdf_path}")
         print(f"Workers: {num_workers}")
         print(f"Confidence: {self.confidence_threshold}")
+
+        # Print GPU status
+        if self.gpu_manager and self.gpu_manager.is_available():
+            print(f"Device: {self.gpu_manager.get_info().device_name} (GPU)")
+            if self.enable_mixed_precision:
+                print(f"Precision: Mixed (FP16/FP32)")
+        else:
+            print(f"Device: CPU")
         print()
 
         # Get page range
@@ -139,6 +172,9 @@ class UnifiedDetectionModule:
         all_detections = []
         start_time = datetime.now()
 
+        # Get device string for worker processes
+        device_str = self.gpu_manager.get_device_string() if self.gpu_manager else 'cpu'
+
         print("Starting parallel page detection...")
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
             future_to_page = {
@@ -147,7 +183,8 @@ class UnifiedDetectionModule:
                     str(pdf_path),
                     page_num,
                     self.model_path,
-                    self.confidence_threshold
+                    self.confidence_threshold,
+                    device_str  # Pass device to workers
                 ): page_num
                 for page_num in pages_to_process
             }
@@ -164,9 +201,20 @@ class UnifiedDetectionModule:
                 except Exception as e:
                     print(f"  Page {page_num+1}: ERROR - {e}")
 
+        # Clear GPU cache if available
+        if self.gpu_manager and self.gpu_manager.is_available():
+            self.gpu_manager.clear_cache()
+
         duration = (datetime.now() - start_time).total_seconds()
         print()
         print(f"Detection complete in {duration:.1f}s ({len(all_detections)} raw detections)")
+
+        # Report GPU memory stats if available
+        if self.gpu_manager and self.gpu_manager.is_available():
+            stats = self.gpu_manager.get_memory_stats()
+            if stats:
+                print(f"GPU Memory: {stats['allocated_gb']:.2f}/{stats['total_gb']:.2f} GB "
+                      f"({stats['utilization_percent']:.1f}% utilized)")
         print()
 
         # Convert to zones
@@ -360,7 +408,8 @@ class UnifiedDetectionModule:
 
 # Worker function for parallel processing
 def _detect_page_worker(pdf_path: str, page_num: int,
-                       model_path: str, confidence_threshold: float) -> List[Detection]:
+                       model_path: str, confidence_threshold: float,
+                       device: str = 'cpu') -> List[Detection]:
     """
     Process single page with YOLO detection.
 
@@ -383,12 +432,12 @@ def _detect_page_worker(pdf_path: str, page_num: int,
     temp_img = temp_dir / f"page_{page_num}_pid{os.getpid()}.png"
     pix.save(str(temp_img))
 
-    # Run YOLO
+    # Run YOLO with specified device
     results = model.predict(
         str(temp_img),
         imgsz=1024,
         conf=confidence_threshold,
-        device='cpu',
+        device=device,  # Use passed device (cpu or cuda)
         verbose=False
     )
 

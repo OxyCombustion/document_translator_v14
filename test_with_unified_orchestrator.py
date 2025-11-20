@@ -36,6 +36,15 @@ print("=" * 80)
 print(f"Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 print()
 
+# Initialize GPU detection early
+print("Initializing GPU detection...")
+try:
+    from pipelines.shared.packages.common.src.gpu_utils import print_gpu_summary
+    print_gpu_summary()
+except ImportError:
+    print("⚠️  GPU utilities not available. Running in CPU-only mode.")
+    print()
+
 # Configuration
 PDF_PATH = Path("test_data/Ch-04_Heat_Transfer.pdf")
 MODEL_PATH = Path("/home/thermodynamics/document_translator_v12/models/models/Layout/YOLO/doclayout_yolo_docstructbench_imgsz1280_2501.pt")
@@ -96,12 +105,26 @@ try:
     )
 
     duration = (datetime.now() - start_time).total_seconds()
+    duration_minutes = duration / 60.0
 
     print("\n" + "=" * 80)
     print("EXTRACTION COMPLETE")
     print("=" * 80)
-    print(f"Duration: {duration:.1f}s")
+    print(f"Duration: {duration:.1f}s ({duration_minutes:.2f} minutes)")
     print()
+
+    # Report GPU stats if available
+    try:
+        from pipelines.shared.packages.common.src.gpu_utils import GPUManager
+        gpu = GPUManager()
+        if gpu.is_available():
+            stats = gpu.get_memory_stats()
+            print(f"GPU Performance:")
+            print(f"  Peak Memory Usage: {stats['allocated_gb']:.2f} GB / {stats['total_gb']:.2f} GB")
+            print(f"  Memory Utilization: {stats['utilization_percent']:.1f}%")
+            print()
+    except Exception:
+        pass
 
     # Display results
     print("Extraction Results:")

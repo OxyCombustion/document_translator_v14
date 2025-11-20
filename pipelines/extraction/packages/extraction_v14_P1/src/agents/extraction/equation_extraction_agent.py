@@ -87,6 +87,13 @@ from PIL import Image
 # Import base agent using proper package structure
 from pipelines.shared.packages.common.src.base.base_extraction_agent import BaseExtractionAgent, Zone, ExtractedObject
 
+# Import GPU utilities
+try:
+    from pipelines.shared.packages.common.src.gpu_utils import GPUManager
+    GPU_UTILS_AVAILABLE = True
+except ImportError:
+    GPU_UTILS_AVAILABLE = False
+
 
 class EquationExtractionAgent(BaseExtractionAgent):
     """
@@ -125,13 +132,14 @@ class EquationExtractionAgent(BaseExtractionAgent):
         }
     """
 
-    def __init__(self, pdf_path: Path, output_dir: Path):
+    def __init__(self, pdf_path: Path, output_dir: Path, use_gpu: bool = True):
         """
         Initialize equation extraction agent.
 
         Args:
             pdf_path: Path to source PDF
             output_dir: Base output directory
+            use_gpu: Enable GPU acceleration if available (default: True)
 
         Raises:
             ImportError: If pix2tex library not installed
@@ -146,12 +154,29 @@ class EquationExtractionAgent(BaseExtractionAgent):
         self.equations_dir = self.output_dir / "equations"
         self.equations_dir.mkdir(parents=True, exist_ok=True)
 
+        # Initialize GPU manager
+        self.gpu_manager = None
+        if use_gpu and GPU_UTILS_AVAILABLE:
+            self.gpu_manager = GPUManager(enable_amp=True)
+            if self.gpu_manager.is_available():
+                print(f"🚀 GPU acceleration enabled for LaTeX-OCR: {self.gpu_manager.get_info().device_name}")
+            else:
+                print(f"ℹ️  GPU requested but not available for LaTeX-OCR, using CPU")
+                self.gpu_manager = None
+
         # Load LaTeX-OCR model
         print(f"🔧 Loading pix2tex LaTeX-OCR model...")
         try:
             from pix2tex.cli import LatexOCR
-            self.ocr_model = LatexOCR()
-            print(f"✅ LaTeX-OCR model ready")
+
+            # Configure device for pix2tex
+            if self.gpu_manager and self.gpu_manager.is_available():
+                # pix2tex will use CUDA if available
+                self.ocr_model = LatexOCR()
+                print(f"✅ LaTeX-OCR model ready (GPU-accelerated)")
+            else:
+                self.ocr_model = LatexOCR()
+                print(f"✅ LaTeX-OCR model ready (CPU)")
         except ImportError:
             raise ImportError(
                 "pix2tex not installed. Install with: pip install pix2tex[gui]"
@@ -540,7 +565,16 @@ class EquationExtractionAgent(BaseExtractionAgent):
         """
         try:
             image = Image.open(image_path)
-            latex = self.ocr_model(image)
+
+            # Use GPU acceleration if available
+            # Note: pix2tex internally uses torch.cuda if available
+            # The autocast context improves performance with mixed precision
+            if self.gpu_manager and self.gpu_manager.is_available():
+                with self.gpu_manager.autocast():
+                    latex = self.ocr_model(image)
+            else:
+                latex = self.ocr_model(image)
+
             return latex.strip()
         except Exception as e:
             print(f"    ❌ LaTeX-OCR error: {e}")

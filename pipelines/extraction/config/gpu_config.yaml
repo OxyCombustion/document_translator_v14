@@ -1,0 +1,187 @@
+# GPU Configuration for Document Extraction Pipeline
+# Generated: 2025-11-20
+# Version: 1.0.0
+
+# ============================================================================
+# GPU SETTINGS
+# ============================================================================
+
+gpu:
+  # Enable/disable GPU acceleration
+  # If enabled but GPU unavailable, automatically falls back to CPU
+  enabled: true
+
+  # Preferred GPU device index (0-based)
+  # Set to null for automatic selection
+  # In multi-GPU systems, specify which GPU to use
+  device_index: 0  # Use first GPU (null = auto-select)
+
+  # Mixed precision (Automatic Mixed Precision - AMP)
+  # Uses FP16 for faster inference with minimal accuracy loss
+  # Requires GPU with compute capability >= 7.0 (Volta or newer)
+  mixed_precision:
+    enabled: true
+    # Fallback to FP32 if FP16 not supported
+    fallback_to_fp32: true
+
+  # Memory management
+  memory:
+    # Clear GPU cache between document batches
+    clear_cache_between_docs: true
+    # Clear cache between page batches
+    clear_cache_between_pages: false
+    # Maximum GPU memory to use (in GB, null = no limit)
+    max_memory_gb: null
+    # Reserve memory for system (in GB)
+    reserve_memory_gb: 1.0
+
+  # Batch processing optimization
+  batch_processing:
+    # Enable batch processing for multiple pages
+    enabled: true
+    # Batch size for page processing
+    # Larger batches = faster but more memory
+    # Auto-tune based on available GPU memory
+    page_batch_size: 4  # Process 4 pages at once
+    # Dynamic batch sizing (adjust based on GPU memory)
+    dynamic_batch_size: true
+    # Minimum batch size for dynamic sizing
+    min_batch_size: 1
+    # Maximum batch size for dynamic sizing
+    max_batch_size: 8
+
+  # Performance monitoring
+  monitoring:
+    # Log GPU memory usage
+    log_memory_usage: true
+    # Log processing speed
+    log_speed: true
+    # Report GPU utilization
+    report_utilization: true
+
+# ============================================================================
+# MODEL-SPECIFIC GPU SETTINGS
+# ============================================================================
+
+models:
+  # YOLO detection model
+  yolo:
+    # Use GPU for YOLO inference
+    use_gpu: true
+    # Image size for YOLO (larger = more accurate but slower)
+    # Common values: 640, 1024, 1280
+    image_size: 1024
+    # Confidence threshold
+    confidence_threshold: 0.2
+    # Batch size for YOLO (if batch processing enabled)
+    batch_size: 4
+
+  # LaTeX-OCR model (pix2tex)
+  latex_ocr:
+    # Use GPU for LaTeX-OCR
+    use_gpu: true
+    # Batch size for equation processing
+    batch_size: 8
+    # Use mixed precision for OCR
+    use_mixed_precision: true
+
+  # Docling models
+  docling:
+    # Use GPU for Docling processing
+    use_gpu: true
+    # Model-specific settings
+    use_mixed_precision: true
+
+# ============================================================================
+# FALLBACK BEHAVIOR
+# ============================================================================
+
+fallback:
+  # Behavior when GPU unavailable
+  on_gpu_unavailable:
+    # Continue with CPU (recommended)
+    action: "continue_cpu"
+    # Other options: "error", "warn_and_continue"
+
+    # Log level for GPU unavailable message
+    log_level: "info"  # info, warning, error
+
+    # Show performance comparison message
+    show_performance_note: true
+
+  # Behavior on GPU out-of-memory error
+  on_out_of_memory:
+    # Reduce batch size and retry
+    action: "reduce_batch_and_retry"
+    # Other options: "fallback_cpu", "error"
+
+    # Batch size reduction factor
+    batch_reduction_factor: 0.5
+
+    # Maximum retry attempts
+    max_retries: 3
+
+# ============================================================================
+# PERFORMANCE TUNING
+# ============================================================================
+
+performance:
+  # Number of worker threads for CPU operations
+  # (Used even when GPU enabled for data loading)
+  num_workers: 8
+
+  # Pin memory for faster GPU transfer
+  pin_memory: true
+
+  # Synchronize GPU after each operation (for accurate timing)
+  # Disable for maximum speed
+  sync_for_timing: false
+
+  # Prefetch data while GPU is processing
+  prefetch_factor: 2
+
+# ============================================================================
+# BENCHMARKING
+# ============================================================================
+
+benchmark:
+  # Run warmup iterations before benchmarking
+  warmup_iterations: 2
+
+  # Compare CPU vs GPU performance
+  compare_cpu_gpu: false
+
+  # Report detailed timing breakdown
+  detailed_timing: true
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# GPU Requirements:
+# - NVIDIA GPU with CUDA support
+# - CUDA 13.0+ (or compatible version)
+# - GPU memory: 6GB+ recommended for full pipeline
+#   - YOLO: ~2-4GB depending on batch size
+#   - LaTeX-OCR: ~1-2GB
+#   - Reserve: ~1GB for system
+#
+# Performance Expectations:
+# - YOLO detection: ~10x speedup vs CPU
+# - LaTeX-OCR: ~5-10x speedup vs CPU
+# - Overall: 34-page document ~9 min (CPU) → ~1 min (GPU)
+#
+# Mixed Precision:
+# - Reduces memory usage by ~50%
+# - Increases speed by ~1.5-2x
+# - Minimal accuracy impact (<1%)
+# - Requires compute capability 7.0+ (Volta or newer)
+#
+# Multi-GPU:
+# - Currently uses single GPU (device_index)
+# - Multi-GPU support can be added for document-level parallelization
+#
+# Fallback to CPU:
+# - Automatic and seamless
+# - No code changes required
+# - Performance will be slower but functionality preserved
