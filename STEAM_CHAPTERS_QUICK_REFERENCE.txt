@@ -1,0 +1,98 @@
+================================================================================
+STEAM BOOK CHAPTER INVENTORY - QUICK REFERENCE
+================================================================================
+
+Date: 2025-11-21
+Zotero Library: ~/windows_zotero/
+Working Directory: ~/document_translator_v14/
+
+SUMMARY
+--------------------------------------------------------------------------------
+Total Chapters:        54 (Ch-00 through Ch-53)
+Processed:             2 (Ch-03, Ch-04)
+Remaining:            52
+Total Size:          136.8 MB
+
+SIZE DISTRIBUTION
+--------------------------------------------------------------------------------
+Smallest:   0.4 MB  (Ch-53 Nuclear Waste Management)
+Largest:    7.2 MB  (Ch-10 Principles of Combustion)
+Average:    2.6 MB
+Median:     2.3 MB
+
+RECOMMENDED FIRST 5 TESTS
+--------------------------------------------------------------------------------
+1. Ch-53  0.4M  Nuclear Waste Management          (MICRO - pipeline test)
+2. Ch-44  1.0M  Boiler Operations                 (QUICK turnaround)
+3. Ch-48  1.1M  Nuclear Fuels                     (NUCLEAR topic)
+4. Ch-49  1.1M  Principles of Nuclear Reactions   (EQUATION heavy)
+5. Ch-08  1.2M  Structural                        (ENGINEERING topic)
+
+BATCH PLAN (6 batches, smallest to largest)
+--------------------------------------------------------------------------------
+Batch 1:  10 chapters,  12.1 MB  (0.4M - 1.6M)  [MICRO]
+Batch 2:  10 chapters,  17.5 MB  (1.6M - 2.0M)  [SMALL]
+Batch 3:  10 chapters,  22.2 MB  (2.0M - 2.4M)  [MEDIUM]
+Batch 4:  10 chapters,  29.0 MB  (2.5M - 3.2M)  [LARGE]
+Batch 5:  10 chapters,  42.6 MB  (3.2M - 5.9M)  [EXTRA LARGE]
+Batch 6:   2 chapters,  13.5 MB  (6.3M - 7.2M)  [MEGA - stress test]
+
+FILES GENERATED
+--------------------------------------------------------------------------------
+✓ STEAM_CHAPTERS_INVENTORY.md     Detailed markdown report
+✓ steam_chapters_inventory.csv    Spreadsheet-ready data
+✓ STEAM_CHAPTERS_QUICK_REFERENCE.txt  This file
+
+PROCESSING WORKFLOW
+--------------------------------------------------------------------------------
+1. Select chapter from inventory
+2. Run extraction pipeline:
+   python -m cli_v14_P7 extraction --input {chapter_path} --output test_output_{ch}
+3. Run RAG pipeline:
+   python -m cli_v14_P7 rag --input test_output_{ch} --output test_output_{ch}_rag
+4. Run database pipeline:
+   python -m cli_v14_P7 database --input test_output_{ch}_rag --output test_output_database_{ch}
+5. Mark as PROCESSED in inventory
+
+PATHS TO TOP 5 CHAPTERS
+--------------------------------------------------------------------------------
+Ch-53: ~/windows_zotero/storage/UNMJIZT3/Ch-53 Nuclear Waste Management.pdf
+Ch-44: ~/windows_zotero/storage/CZ5R6KY4/Ch-44 Boiler Operations.pdf
+Ch-48: ~/windows_zotero/storage/62IBFRKL/Ch-48 Nuclear Fuels.pdf
+Ch-49: ~/windows_zotero/storage/B3STPXVQ/Ch-49 Principles of Nuclear Reactions.pdf
+Ch-08: ~/windows_zotero/storage/8ZZ2YGRA/Ch-08 Structural.pdf
+
+FULL PATHS (for copy-paste)
+--------------------------------------------------------------------------------
+/home/thermodynamics/windows_zotero/storage/UNMJIZT3/Ch-53 Nuclear Waste Management.pdf
+/home/thermodynamics/windows_zotero/storage/CZ5R6KY4/Ch-44 Boiler Operations.pdf
+/home/thermodynamics/windows_zotero/storage/62IBFRKL/Ch-48 Nuclear Fuels.pdf
+/home/thermodynamics/windows_zotero/storage/B3STPXVQ/Ch-49 Principles of Nuclear Reactions.pdf
+/home/thermodynamics/windows_zotero/storage/8ZZ2YGRA/Ch-08 Structural.pdf
+
+CATEGORY BREAKDOWN
+--------------------------------------------------------------------------------
+Micro (< 1.5M):           8 chapters  (15%)
+Small (1.5-2.0M):         9 chapters  (17%)
+Medium (2.0-3.0M):       17 chapters  (33%)
+Large (3.0-4.0M):        10 chapters  (19%)
+Extra Large (4.0-6.0M):   6 chapters  (12%)
+Mega (> 6.0M):            2 chapters   (4%)
+
+NEXT STEPS
+--------------------------------------------------------------------------------
+[ ] Choose first test chapter (recommend Ch-53)
+[ ] Validate extraction pipeline
+[ ] Check processing time and memory
+[ ] Proceed through Batch 1
+[ ] Monitor quality metrics at each step
+
+QUALITY GATES (before moving to next batch)
+--------------------------------------------------------------------------------
+[ ] Extraction success rate > 95%
+[ ] No pipeline crashes or timeouts
+[ ] Output structure validated
+[ ] Memory usage acceptable
+[ ] Processing time reasonable
+
+================================================================================
