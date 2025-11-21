@@ -64,6 +64,9 @@ from pipelines.rag_ingestion.packages.analysis_validation_v14_P19.src.validation
 from pipelines.data_management.packages.metadata_v14_P13.src.bibliography.bibliography_extraction_agent import BibliographyExtractionAgent
 from pipelines.extraction.packages.extraction_v14_P1.src.agents.table.table_export_agent import TableExportAgent
 
+# Import structured output manager
+from pipelines.extraction.packages.extraction_v14_P1.src.output.structured_output_manager import StructuredOutputManager
+
 
 class UnifiedPipelineOrchestrator:
     """
@@ -76,7 +79,8 @@ class UnifiedPipelineOrchestrator:
     - Result aggregation
     """
 
-    def __init__(self, model_path: str, output_dir: Path, clean_before_run: bool = True):
+    def __init__(self, model_path: str, output_dir: Path, clean_before_run: bool = True,
+                 enable_structured_output: bool = True):
         """
         Initialize orchestrator.
 
@@ -84,10 +88,12 @@ class UnifiedPipelineOrchestrator:
             model_path: Path to DocLayout-YOLO model
             output_dir: Base output directory for all extractions
             clean_before_run: If True, remove old extraction files before processing (default: True)
+            enable_structured_output: If True, create hierarchical output structure (default: True)
         """
         self.model_path = model_path
         self.output_dir = Path(output_dir)
         self.clean_before_run = clean_before_run
+        self.enable_structured_output = enable_structured_output
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def _clean_output_directories(self):
@@ -432,6 +438,54 @@ class UnifiedPipelineOrchestrator:
 
         print(f"Summary saved: {summary_file}")
         print()
+
+        # ==================================================================
+        # PHASE 4 (OPTIONAL): STRUCTURED OUTPUT ORGANIZATION
+        # ==================================================================
+        if self.enable_structured_output:
+            print(f"{'='*80}")
+            print(f"PHASE 4: HIERARCHICAL OUTPUT ORGANIZATION")
+            print(f"{'='*80}")
+            print()
+
+            structured_start = datetime.now()
+
+            try:
+                # Create hierarchical view of outputs
+                structured_output_dir = self.output_dir.parent / f"{self.output_dir.name}_structured"
+                output_manager = StructuredOutputManager(
+                    flat_output_dir=self.output_dir,
+                    structured_output_dir=structured_output_dir,
+                    pdf_path=pdf_path,
+                    enable_structure_detection=True
+                )
+
+                organization_stats = output_manager.organize_outputs()
+
+                structured_duration = (datetime.now() - structured_start).total_seconds()
+                print(f"Hierarchical organization complete in {structured_duration:.1f}s")
+                print(f"Structured output: {structured_output_dir}")
+                print()
+
+                # Add to summary
+                summary['structured_output'] = {
+                    'enabled': True,
+                    'location': str(structured_output_dir),
+                    'statistics': organization_stats
+                }
+
+            except Exception as e:
+                print(f"⚠️  Structured output organization failed: {e}")
+                print("   (Flat outputs are still available)")
+                print()
+                summary['structured_output'] = {
+                    'enabled': False,
+                    'error': str(e)
+                }
+
+            # Re-save summary with structured output info
+            with open(summary_file, 'w', encoding='utf-8') as f:
+                json.dump(summary, f, indent=2, ensure_ascii=False)
 
         return {
             'results': results,

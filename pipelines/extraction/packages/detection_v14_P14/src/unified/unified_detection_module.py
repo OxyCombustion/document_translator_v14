@@ -100,7 +100,8 @@ class UnifiedDetectionModule:
     }
 
     def __init__(self, model_path: str, confidence_threshold: float = 0.2,
-                 use_gpu: bool = True, enable_mixed_precision: bool = True):
+                 use_gpu: bool = True, enable_mixed_precision: bool = True,
+                 rendering_dpi: int = 300):
         """
         Initialize unified detector.
 
@@ -109,11 +110,13 @@ class UnifiedDetectionModule:
             confidence_threshold: Minimum confidence (default: 0.2)
             use_gpu: Enable GPU acceleration if available (default: True)
             enable_mixed_precision: Enable mixed precision for GPU (default: True)
+            rendering_dpi: DPI for PDF rendering (default: 300, can use 200 for speed)
         """
         self.model_path = model_path
         self.confidence_threshold = confidence_threshold
         self.use_gpu = use_gpu
         self.enable_mixed_precision = enable_mixed_precision
+        self.rendering_dpi = rendering_dpi
 
         # Initialize GPU manager
         self.gpu_manager = None
@@ -184,7 +187,8 @@ class UnifiedDetectionModule:
                     page_num,
                     self.model_path,
                     self.confidence_threshold,
-                    device_str  # Pass device to workers
+                    device_str,  # Pass device to workers
+                    self.rendering_dpi  # Pass DPI to workers
                 ): page_num
                 for page_num in pages_to_process
             }
@@ -409,7 +413,7 @@ class UnifiedDetectionModule:
 # Worker function for parallel processing
 def _detect_page_worker(pdf_path: str, page_num: int,
                        model_path: str, confidence_threshold: float,
-                       device: str = 'cpu') -> List[Detection]:
+                       device: str = 'cpu', rendering_dpi: int = 300) -> List[Detection]:
     """
     Process single page with YOLO detection.
 
@@ -422,8 +426,8 @@ def _detect_page_worker(pdf_path: str, page_num: int,
     doc = fitz.open(pdf_path)
     page = doc[page_num]
 
-    # Render at 300 DPI
-    mat = fitz.Matrix(300/72, 300/72)
+    # Render at specified DPI
+    mat = fitz.Matrix(rendering_dpi/72, rendering_dpi/72)
     pix = page.get_pixmap(matrix=mat)
 
     # Save temp image
